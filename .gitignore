@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Production build outputs
+dist/
+dist-ssr/
+build/
+out/
+
+# Local environment and secret files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Vite cache & temp
+.vite/
+.temp/
+.tmp/
+
+# Testing & Coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# IDE & Editor files
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Operating System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
