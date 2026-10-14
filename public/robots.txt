@@ -1,0 +1,80 @@
+# GearForge 3D — Robots.txt
+# Developer: Trunçgil Teknoloji (https://www.truncgil.com.tr)
+# Platform: https://gear.truncgil.com
+# Parametric Involute Gear Generator & 3D Printing CAD Studio
+
+User-agent: *
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /sitemap.xml
+Allow: /*.png$
+Allow: /*.webp$
+Allow: /*.svg$
+Allow: /*.stl$
+Allow: /*.obj$
+Allow: /*.json$
+
+# Explicit rules welcoming AI Search & LLM Crawlers
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: OAI-SearchBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: Claude-Web
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: Google-Extended
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: Applebot-Extended
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: CCBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: cohere-ai
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: Diffbot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+# LLM Documentation Standards
+# See https://llmstxt.org/ for specification
+# AI assistants and RAG systems can access structured knowledge here:
+# https://gear.truncgil.com/llms.txt
+# https://gear.truncgil.com/llms-full.txt
+
+Sitemap: https://gear.truncgil.com/sitemap.xml

@@ -1,6 +1,7 @@
 import { GearBuilderState, GearBuilderStore } from '../../application/GearBuilderStore';
 import { ExportFormat } from '../../domain/models/GearTypes';
 import { GearViewportController } from '../../infrastructure/three/GearViewportController';
+import { EngineeringGuideModal } from './EngineeringGuideModal';
 import { ProjectManagerModal } from './ProjectManagerModal';
 import { SaveProjectModal } from './SaveProjectModal';
 import { ToastNotification } from './ToastNotification';
@@ -11,6 +12,7 @@ export class AppMenuBar {
   private readonly viewport: GearViewportController;
   private readonly projectManagerModal: ProjectManagerModal;
   private readonly saveModal: SaveProjectModal;
+  private readonly guideModal: EngineeringGuideModal;
 
   private activeDropdown: HTMLElement | null = null;
   private activeProjectBadgeEl!: HTMLElement;
@@ -28,6 +30,7 @@ export class AppMenuBar {
     this.viewport = viewport;
     this.projectManagerModal = projectManagerModal;
     this.saveModal = saveModal;
+    this.guideModal = new EngineeringGuideModal();
 
     this.render();
     this.setupGlobalShortcuts();
@@ -146,14 +149,34 @@ export class AppMenuBar {
       },
       {
         icon: '📐',
-        label: 'ISO 21771 Evolvent Geometri Standartları',
+        label: 'ISO 21771 & 3D Baskı Kılavuzu',
+        highlight: true,
         action: () => {
-          ToastNotification.info(
-            'ISO 21771 standartlarına tam uyumlu evolvent diş eğrisi hesaplamaları ve Watertight 2-Manifold mesh topolojisi kullanılmaktadır.',
-            'ISO 21771 Standardı'
-          );
+          this.guideModal.open('formulas');
         },
       },
+      {
+        icon: '🖨️',
+        label: 'FDM Baskı & Backlash Tolerans Tablosu',
+        action: () => {
+          this.guideModal.open('fdm');
+        },
+      },
+      {
+        icon: '🔩',
+        label: 'DIN 6885 Mil & Kama Standartları',
+        action: () => {
+          this.guideModal.open('shafts');
+        },
+      },
+      {
+        icon: '🤖',
+        label: 'Yapay Zeka (GEO) & llms.txt Rehberi',
+        action: () => {
+          this.guideModal.open('ai');
+        },
+      },
+      { divider: true },
       {
         icon: '⌨️',
         label: 'Klavye Kısayolları (Shortcuts)',

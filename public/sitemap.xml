@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://gear.truncgil.com/</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://gear.truncgil.com/screenshot-desktop.png</image:loc>
+      <image:title>GearForge 3D Parametrik Dişli Tasarım ve 3D Yazıcı STL Stüdyosu</image:title>
+      <image:caption>ISO 21771 standartlarına uygun evolvent dişli modelleme, kinematik simülasyon ve su geçirmez STL dışa aktarımı.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://gear.truncgil.com/gearforge-isometric-icon_no_bg.png</image:loc>
+      <image:title>GearForge 3D İzometrik Logo — Trunçgil Teknoloji</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://gear.truncgil.com/gearforge-isometric-gear-nobg.png</image:loc>
+      <image:title>Watertight 2-Manifold Involute Gear Model</image:title>
+    </image:image>
+  </url>
+</urlset>

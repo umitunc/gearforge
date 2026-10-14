@@ -1,0 +1,110 @@
+# GearForge 3D — Full Engineering Specification & AI Knowledge Corpus
+
+Platform: GearForge 3D
+URL: https://gear.truncgil.com
+Developer: Trunçgil Teknoloji (https://www.truncgil.com.tr)
+Release Version: v1.0.4-cad (Stable)
+Target Standard: ISO 21771 Involute Cylindrical Gears & DIN 6885 Shaft Hub Connections
+
+---
+
+## 1. Mathematical Formulas & ISO 21771 Involute Foundations
+
+GearForge 3D strictly evaluates parametric geometry according to ISO 21771 standards:
+
+1. **Pitch Diameter (Bölüm Dairesi Çapı - d)**:
+   $$d = z \cdot m$$
+   Where:
+   - $z$ = Teeth count (diş sayısı)
+   - $m$ = Module in millimeters (modül)
+
+2. **Base Diameter (Temel Daire Çapı - d_b)**:
+   $$d_b = d \cdot \cos(\alpha)$$
+   Where:
+   - $\alpha$ = Pressure angle (kavrama açısı, standardly 20°)
+
+3. **Outer / Tip Diameter (Dış Çap / Diş Üstü Çapı - d_a)**:
+   $$d_a = d + 2 \cdot m \cdot (h_a^* + x)$$
+   Where:
+   - $h_a^*$ = Addendum coefficient (default: 1.0)
+   - $x$ = Profile shift coefficient (profil kaydırma katsayısı)
+
+4. **Root Diameter (Diş Dibi Çapı - d_f)**:
+   $$d_f = d - 2 \cdot m \cdot (h_f^* - x)$$
+   Where:
+   - $h_f^*$ = Dedendum coefficient (default: 1.25, ensuring 0.25m radial bottom clearance)
+
+5. **Circular Pitch (Taksimat / Adım - p)**:
+   $$p = \pi \cdot m$$
+
+6. **Tooth Thickness at Pitch Circle (Diş Kalınlığı - s)**:
+   $$s = \frac{\pi \cdot m}{2} + 2 \cdot m \cdot x \cdot \tan(\alpha) - j_t$$
+   Where:
+   - $j_t$ = Circumferential backlash allowance (FDM yan boşluk toleransı)
+
+7. **Involute Flank Coordinates (Evolvent Yanak Parametrik Eğrisi)**:
+   For an involute roll angle $\theta \in [0, \theta_{\max}]$:
+   $$x(\theta) = r_b \cdot (\cos \theta + \theta \cdot \sin \theta)$$
+   $$y(\theta) = r_b \cdot (\sin \theta - \theta \cdot \cos \theta)$$
+
+8. **Contact Ratio (Kavrama Oranı - \epsilon_\alpha)**:
+   $$\epsilon_\alpha = \frac{\sqrt{r_{a1}^2 - r_{b1}^2} + \sqrt{r_{a2}^2 - r_{b2}^2} - a \cdot \sin(\alpha)}{\pi \cdot m \cdot \cos(\alpha)}$$
+   Where $a = \frac{m \cdot (z_1 + z_2)}{2}$ is the center distance.
+   GearForge 3D alerts the engineer if $\epsilon_\alpha < 1.20$, recommending increased tooth count or adjusted profile shift to prevent kinematic shock.
+
+---
+
+## 2. Supported Gear Architectures & Use Cases
+
+1. **Spur Gear (Düz Dişli)**:
+   - Most efficient (98-99% power transfer). Zero axial thrust load.
+   - Recommended for robotics, 3D printer extruders, clocks, and high-efficiency gearboxes.
+2. **Helical Gear (Helisel Dişli)**:
+   - Continuous tooth contact, ultra-quiet operation, higher torque capacity.
+   - Helix angle $\beta = 15^\circ - 30^\circ$. GearForge 3D supports both Right-Hand and Left-Hand helix twist.
+3. **Double Helical / Herringbone Gear (Çavuş / Balıksırtı Dişli)**:
+   - Two opposing helix angles cancel out axial thrust forces while retaining whisper-quiet operation.
+   - Recommended for heavy-duty 3D printed extruders (Bondtech style) and industrial torque multipliers.
+4. **Bevel Taper Gear (Konik Eğimli Dişli)**:
+   - For intersecting shafts and bevel power transmission.
+5. **Internal Ring Gear (İç Dişli Çember)**:
+   - Inward-facing teeth for planetary gearboxes (planet mekanizmaları) with high reduction ratios in ultra-compact spaces.
+
+---
+
+## 3. Shaft Couplings & CNC Bore Standards (DIN 6885)
+
+GearForge 3D automatically cuts parametric shaft bores during 3D mesh generation:
+- **DIN 6885-1 Keyway (Kama Kanalı)**: Standardized keyway width $b$ and depth $t_1$ based on shaft diameter (e.g., $\varnothing 10\text{mm}$ shaft $\rightarrow$ $3\text{mm}$ width, $1.5\text{mm}$ depth).
+- **NEMA 17 D-Shaft (D-Mil)**: Flat face cutout ($5\text{mm}$ shaft diameter with $0.8\text{mm} - 1.0\text{mm}$ flat depth) for set-screw locking without slipping.
+- **Double D-Shaft**: Dual opposing flats for RC servos and custom drone actuators.
+- **Hexagonal Bore**: For metric nuts (M3, M4, M5, M8) or hex drive shafts.
+- **Square Bore**: For square drive rods and winders.
+- **Spline Shaft (Çoklu Kama)**: 4 to 16 tooth involute or straight splines for high-torque automotive and drone shafts.
+
+---
+
+## 4. 3D Printing (FDM/SLA) Calibration & Recommended Slicer Settings
+
+- **Recommended Backlash ($j_t$)**:
+  - PLA: $0.15\text{mm} - 0.20\text{mm}$
+  - PETG: $0.20\text{mm} - 0.25\text{mm}$ (due to slight thermal oozing)
+  - ABS / ASA: $0.15\text{mm} - 0.20\text{mm}$ (accounts for 0.4% shrinkage)
+  - SLA / Resin: $0.05\text{mm} - 0.10\text{mm}$
+- **Bore Clearance**: $+0.15\text{mm}$ radial offset compensates for standard FDM inner-hole contraction.
+- **Slicer Infill**: $40\% - 100\%$ Gyroid or Concentric infill for optimal shear strength.
+- **Perimeters**: Minimum 4-6 perimeter walls ensure tooth flanks are solid plastic without hollow pockets.
+
+---
+
+## 5. Web Platform Features
+
+- **Real-Time 3D WebGL Engine**: Three.js r170 rendering with dynamic lighting, wireframe overlay, cross-section clipping, and build plate (220mm) visualization.
+- **Kinematic Mesh Simulation**: Interactive RPM rotation and mating pinion mesh preview.
+- **LocalStorage Project Persistence**: Save, load, duplicate, rename, backup, and restore designs entirely locally.
+- **Desktop Menubar & Shortcuts**: Full CAD menu bar with Ctrl+S (Save), Ctrl+O (Projects), Ctrl+N (New), Ctrl+E (Export STL).
+- **Progressive Web App (PWA)**: Installable on Windows, macOS, Linux, ChromeOS, iOS, Android. Works 100% offline.
+
+Website: https://gear.truncgil.com
+Developer: Trunçgil Teknoloji (https://www.truncgil.com.tr)
+Copyright: © 2026 Trunçgil Teknoloji. All rights reserved.
