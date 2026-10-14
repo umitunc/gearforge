@@ -9,9 +9,13 @@ import { InvoluteToothProfileGenerator } from './domain/profiles/tooth/InvoluteT
 import { WebCutoutRegistry } from './domain/profiles/web/WebCutoutRegistry';
 import { ExporterRegistry } from './infrastructure/exporters/ExporterRegistry';
 import { PwaManager } from './infrastructure/pwa/PwaManager';
+import { LocalStorageProjectRepository } from './infrastructure/storage/LocalStorageProjectRepository';
 import { GearViewportController } from './infrastructure/three/GearViewportController';
+import { AppMenuBar } from './presentation/components/AppMenuBar';
 import { EngineeringMetricsView } from './presentation/components/EngineeringMetricsView';
 import { ParameterControlsView } from './presentation/components/ParameterControlsView';
+import { ProjectManagerModal } from './presentation/components/ProjectManagerModal';
+import { SaveProjectModal } from './presentation/components/SaveProjectModal';
 import { ViewportOverlayToolbar } from './presentation/components/ViewportOverlayToolbar';
 import './presentation/styles/main.css';
 
@@ -23,6 +27,7 @@ function bootstrapGearBuilderApp(): void {
   const viewportStage = document.getElementById('viewport-stage');
   const canvasHost = document.getElementById('viewport-canvas-host');
   const rightPanel = document.getElementById('right-metrics-panel');
+  const menubarEl = document.getElementById('app-menubar');
 
   if (!leftPanel || !viewportStage || !canvasHost || !rightPanel) {
     throw new Error('Uygulama DOM konteynerleri bulunamadı.');
@@ -46,6 +51,7 @@ function bootstrapGearBuilderApp(): void {
 
   const presetRepository = new GearPresetRepository();
   const exporterRegistry = new ExporterRegistry();
+  const storageRepository = new LocalStorageProjectRepository();
 
   // 2. Application Store oluştur
   const store = new GearBuilderStore(
@@ -53,7 +59,8 @@ function bootstrapGearBuilderApp(): void {
     metricsCalculator,
     meshBuilder,
     presetRepository,
-    exporterRegistry
+    exporterRegistry,
+    storageRepository
   );
 
   // 3. Three.js 3B Sahne Kontrolcüsünü başlat ve Store'a bağla
@@ -68,19 +75,39 @@ function bootstrapGearBuilderApp(): void {
     );
   });
 
-  // 4. UI Görünüm Bileşenlerini bağla
+  // 4. Modalleri oluştur (Save ve Projeler Yöneticisi)
+  const saveModal = new SaveProjectModal(store);
+  const projectManagerModal = new ProjectManagerModal(store, saveModal);
+
+  // 5. Üst Menü Çubuğunu (AppMenuBar) bağla
+  if (menubarEl) {
+    new AppMenuBar(
+      menubarEl,
+      store,
+      viewportController,
+      projectManagerModal,
+      saveModal
+    );
+  }
+
+  // 6. UI Görünüm Bileşenlerini bağla
   new ViewportOverlayToolbar(viewportStage, viewportController, store);
   new ParameterControlsView(leftPanel, store);
-  new EngineeringMetricsView(rightPanel, store);
+  new EngineeringMetricsView(
+    rightPanel,
+    store,
+    () => saveModal.open(false),
+    () => projectManagerModal.open()
+  );
 
-  // 5. Trunçgil Teknoloji Telif & Sürüm Bilgisi Modalı Olay Dinleyicileri
+  // 7. Trunçgil Teknoloji Telif & Sürüm Bilgisi Modalı Olay Dinleyicileri
   setupCreditsModal();
 
-  // 6. Progressive Web App (PWA) ve Çevrimdışı Yaşam Döngüsü Yöneticisini Başlat
+  // 8. Progressive Web App (PWA) ve Çevrimdışı Yaşam Döngüsü Yöneticisini Başlat
   const pwaManager = new PwaManager();
   pwaManager.init();
 
-  // 7. 3B Sahne ve Arayüz hazır olduğunda Preloader'ı yumuşak geçişle kapat
+  // 9. 3B Sahne ve Arayüz hazır olduğunda Preloader'ı yumuşak geçişle kapat
   dismissAppPreloader();
 }
 
@@ -129,5 +156,3 @@ function dismissAppPreloader(): void {
 }
 
 bootstrapGearBuilderApp();
-
-

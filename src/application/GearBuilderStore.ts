@@ -12,7 +12,9 @@ import {
   GearPreset,
   GearPresetRepository,
 } from '../domain/presets/GearPresetRepository';
+import { SavedGearProject } from '../domain/models/SavedProject';
 import { ExporterRegistry } from '../infrastructure/exporters/ExporterRegistry';
+import { LocalStorageProjectRepository } from '../infrastructure/storage/LocalStorageProjectRepository';
 import { GearViewportController } from '../infrastructure/three/GearViewportController';
 
 export interface GearBuilderState {
@@ -23,6 +25,9 @@ export interface GearBuilderState {
   readonly matingMesh: GearMeshData | null;
   readonly activePresetId: string | null;
   readonly activeHighlightSection: GearHighlightSection;
+  readonly currentProjectId: string | null;
+  readonly currentProjectName: string;
+  readonly isDirty: boolean;
 }
 
 export type StateSubscriber = (state: GearBuilderState) => void;
@@ -36,6 +41,7 @@ export class GearBuilderStore {
   private readonly meshBuilder: ManifoldGearMeshBuilder;
   private readonly presetRepository: GearPresetRepository;
   private readonly exporterRegistry: ExporterRegistry;
+  private readonly storageRepository: LocalStorageProjectRepository;
 
   private state: GearBuilderState;
   private readonly subscribers = new Set<StateSubscriber>();
@@ -45,23 +51,49 @@ export class GearBuilderStore {
     metricsCalculator = new GearMetricsCalculator(),
     meshBuilder = new ManifoldGearMeshBuilder(),
     presetRepository = new GearPresetRepository(),
-    exporterRegistry = new ExporterRegistry()
+    exporterRegistry = new ExporterRegistry(),
+    storageRepository = new LocalStorageProjectRepository()
   ) {
     this.validator = validator;
     this.metricsCalculator = metricsCalculator;
     this.meshBuilder = meshBuilder;
     this.presetRepository = presetRepository;
     this.exporterRegistry = exporterRegistry;
+    this.storageRepository = storageRepository;
+
+    // Son aktif projeyi kontrol et veya varsayılanı yükle
+    let initialParams = createDefaultGearParameters();
+    let initialPresetId: string | null = 'standard_spur_keyway';
+    let initialProjectId: string | null = null;
+    let initialProjectName = 'Yeni Dişli Tasarımı';
+
+    const activeId = this.storageRepository.getActiveProjectId();
+    if (activeId) {
+      const saved = this.storageRepository.getById(activeId);
+      if (saved) {
+        initialParams = saved.parameters;
+        initialPresetId = null;
+        initialProjectId = saved.id;
+        initialProjectName = saved.name;
+      }
+    }
 
     this.state = this.computeFullState(
-      createDefaultGearParameters(),
-      'standard_spur_keyway',
-      GearHighlightSection.NONE
+      initialParams,
+      initialPresetId,
+      GearHighlightSection.NONE,
+      initialProjectId,
+      initialProjectName,
+      false
     );
   }
 
   public getState(): GearBuilderState {
     return this.state;
+  }
+
+  public getStorageRepository(): LocalStorageProjectRepository {
+    return this.storageRepository;
   }
 
   public getPresets(): readonly GearPreset[] {
@@ -84,8 +116,12 @@ export class GearBuilderStore {
     this.state = this.computeFullState(
       merged,
       null,
-      this.state.activeHighlightSection
+      this.state.activeHighlightSection,
+      this.state.currentProjectId,
+      this.state.currentProjectName,
+      true
     );
+    this.storageRepository.saveAutoSave(merged);
     this.notify();
   }
 
@@ -111,18 +147,102 @@ export class GearBuilderStore {
     this.state = this.computeFullState(
       preset.parameters,
       preset.id,
-      this.state.activeHighlightSection
+      this.state.activeHighlightSection,
+      null,
+      preset.name,
+      false
     );
+    this.storageRepository.setActiveProjectId(null);
+    this.storageRepository.saveAutoSave(preset.parameters);
+    this.notify();
+  }
+
+  public newProject(): void {
+    const defaultParams = createDefaultGearParameters();
+    this.state = this.computeFullState(
+      defaultParams,
+      'standard_spur_keyway',
+      GearHighlightSection.NONE,
+      null,
+      'Yeni Dişli Tasarımı',
+      false
+    );
+    this.storageRepository.setActiveProjectId(null);
+    this.storageRepository.saveAutoSave(defaultParams);
     this.notify();
   }
 
   public resetToDefault(): void {
-    this.state = this.computeFullState(
-      createDefaultGearParameters(),
-      'standard_spur_keyway',
-      GearHighlightSection.NONE
+    this.newProject();
+  }
+
+  public saveCurrentProject(name?: string, description?: string): SavedGearProject {
+    const finalName = name?.trim() || this.state.currentProjectName || 'Yeni Dişli Tasarımı';
+    const saved = this.storageRepository.save(
+      finalName,
+      this.state.parameters,
+      this.state.currentProjectId || undefined,
+      description
     );
+
+    this.state = {
+      ...this.state,
+      currentProjectId: saved.id,
+      currentProjectName: saved.name,
+      isDirty: false,
+    };
     this.notify();
+    return saved;
+  }
+
+  public saveProjectAs(name: string, description?: string): SavedGearProject {
+    const saved = this.storageRepository.save(
+      name,
+      this.state.parameters,
+      undefined,
+      description
+    );
+
+    this.state = {
+      ...this.state,
+      currentProjectId: saved.id,
+      currentProjectName: saved.name,
+      isDirty: false,
+    };
+    this.notify();
+    return saved;
+  }
+
+  public loadProjectById(id: string): boolean {
+    const project = this.storageRepository.getById(id);
+    if (!project) return false;
+
+    this.state = this.computeFullState(
+      project.parameters,
+      null,
+      GearHighlightSection.NONE,
+      project.id,
+      project.name,
+      false
+    );
+    this.storageRepository.setActiveProjectId(project.id);
+    this.storageRepository.saveAutoSave(project.parameters);
+    this.notify();
+    return true;
+  }
+
+  public deleteProject(id: string): boolean {
+    const currentId = this.state.currentProjectId;
+    const ok = this.storageRepository.delete(id);
+    if (ok && currentId === id) {
+      this.state = {
+        ...this.state,
+        currentProjectId: null,
+        isDirty: true,
+      };
+      this.notify();
+    }
+    return ok;
   }
 
   public exportPrimaryGear(format: ExportFormat): void {
@@ -163,11 +283,16 @@ export class GearBuilderStore {
         ...createDefaultGearParameters(),
         ...rawParams,
       };
+      const suggestedName = typeof parsed?.name === 'string' ? parsed.name : 'İçe Aktarılan Dişli';
       this.state = this.computeFullState(
         merged,
         null,
-        this.state.activeHighlightSection
+        this.state.activeHighlightSection,
+        null,
+        suggestedName,
+        true
       );
+      this.storageRepository.saveAutoSave(merged);
       this.notify();
       return true;
     } catch {
@@ -178,7 +303,10 @@ export class GearBuilderStore {
   private computeFullState(
     rawParams: GearParameters,
     presetId: string | null,
-    activeHighlightSection: GearHighlightSection
+    activeHighlightSection: GearHighlightSection,
+    currentProjectId: string | null,
+    currentProjectName: string,
+    isDirty: boolean
   ): GearBuilderState {
     const parameters = this.validator.sanitize(rawParams);
     const validationIssues = this.validator.validate(parameters);
@@ -205,6 +333,9 @@ export class GearBuilderStore {
       matingMesh,
       activePresetId: presetId,
       activeHighlightSection,
+      currentProjectId,
+      currentProjectName,
+      isDirty,
     };
   }
 

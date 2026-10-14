@@ -8,6 +8,8 @@ import { ExportFormat } from '../../domain/models/GearTypes';
 export class EngineeringMetricsView {
   private readonly container: HTMLElement;
   private readonly store: GearBuilderStore;
+  private readonly onOpenSaveModal?: () => void;
+  private readonly onOpenProjectsModal?: () => void;
 
   private manifoldBadgeEl!: HTMLElement;
   private statsGridEl!: HTMLElement;
@@ -15,9 +17,16 @@ export class EngineeringMetricsView {
   private issuesContainerEl!: HTMLElement;
   private exportPinionBtn!: HTMLButtonElement;
 
-  constructor(container: HTMLElement, store: GearBuilderStore) {
+  constructor(
+    container: HTMLElement,
+    store: GearBuilderStore,
+    onOpenSaveModal?: () => void,
+    onOpenProjectsModal?: () => void
+  ) {
     this.container = container;
     this.store = store;
+    this.onOpenSaveModal = onOpenSaveModal;
+    this.onOpenProjectsModal = onOpenProjectsModal;
     this.renderLayout();
     this.store.subscribe((state) => this.update(state));
   }
@@ -61,22 +70,30 @@ export class EngineeringMetricsView {
       'btn-secondary btn-accent',
       () => this.store.exportMatingGear(ExportFormat.STL_BINARY)
     );
+    const saveLocalStorageBtn = this.createButton('💾 Projeyi Kaydet', 'btn-secondary btn-storage-save', () => {
+      this.onOpenSaveModal?.();
+    });
+    const openProjectsBtn = this.createButton('📂 Kayıtlı Projeler', 'btn-secondary btn-storage-load', () => {
+      this.onOpenProjectsModal?.();
+    });
     const saveJsonBtn = this.createButton('Ayarları Kaydet (.json)', 'btn-secondary', () =>
       this.store.exportPrimaryGear(ExportFormat.JSON_CONFIG)
     );
-
     const loadJsonBtn = this.createButton('JSON Yükle', 'btn-secondary', () => {
       this.triggerJsonUpload();
     });
-
     const resetBtn = this.createButton('Sıfırla', 'btn-secondary', () => {
-      this.store.resetToDefault();
+      if (confirm('Dişli parametreleri varsayılan değerlere sıfırlansın mı?')) {
+        this.store.resetToDefault();
+      }
     });
 
     secondaryGrid.append(
       objBtn,
       asciiStlBtn,
       this.exportPinionBtn,
+      saveLocalStorageBtn,
+      openProjectsBtn,
       saveJsonBtn,
       loadJsonBtn,
       resetBtn

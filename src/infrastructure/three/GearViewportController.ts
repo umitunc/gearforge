@@ -569,6 +569,11 @@ export class GearViewportController {
     }
   }
 
+  public captureScreenshot(): string {
+    this.renderer.render(this.scene, this.camera);
+    return this.renderer.domElement.toDataURL('image/png');
+  }
+
   public dispose(): void {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
@@ -580,3 +585,4 @@ export class GearViewportController {
     this.renderer.dispose();
   }
 }
+
