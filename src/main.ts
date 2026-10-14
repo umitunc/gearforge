@@ -71,6 +71,58 @@ function bootstrapGearBuilderApp(): void {
   new ViewportOverlayToolbar(viewportStage, viewportController, store);
   new ParameterControlsView(leftPanel, store);
   new EngineeringMetricsView(rightPanel, store);
+
+  // 5. Trunçgil Teknoloji Telif & Sürüm Bilgisi Modalı Olay Dinleyicileri
+  setupCreditsModal();
+
+  // 6. 3B Sahne ve Arayüz hazır olduğunda Preloader'ı yumuşak geçişle kapat
+  dismissAppPreloader();
+}
+
+/**
+ * Trunçgil Teknoloji Telif ve Sürüm Modalı kontrollerini bağlar.
+ */
+function setupCreditsModal(): void {
+  const modal = document.getElementById('credits-modal-overlay');
+  const openBtn = document.getElementById('btn-open-credits');
+  const logoBtn = document.getElementById('brand-logo-btn');
+  const closeBtn = document.getElementById('credits-modal-close');
+  const okBtn = document.getElementById('credits-modal-ok');
+
+  if (!modal) return;
+
+  const show = () => modal.classList.remove('hidden');
+  const hide = () => modal.classList.add('hidden');
+
+  openBtn?.addEventListener('click', show);
+  logoBtn?.addEventListener('click', show);
+  closeBtn?.addEventListener('click', hide);
+  okBtn?.addEventListener('click', hide);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) hide();
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) hide();
+  });
+}
+
+/**
+ * İlk Three.js sahnesi ve UI bileşenleri hazır olduğunda dişli çark preloader'ını yumuşakça kapatır.
+ */
+function dismissAppPreloader(): void {
+  const preloader = document.getElementById('app-preloader');
+  if (!preloader) return;
+
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      preloader.classList.add('fade-out');
+      setTimeout(() => {
+        preloader.remove();
+      }, 550);
+    }, 450);
+  });
 }
 
 bootstrapGearBuilderApp();
+
+

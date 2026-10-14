@@ -1,14 +1,25 @@
-# ⚙️ GearForge 3D — Parametrik 3D Yazıcı Dişli Tasarım & Slicer Stüdyosu
+<p align="center">
+  <img src="public/gearforge-isometric-icon_no_bg.png" alt="GearForge 3D Logo" width="128" height="128" />
+</p>
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Three.js](https://img.shields.io/badge/Three.js-WebGL-black.svg?logo=three.js&logoColor=white)](https://threejs.org/)
-[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF.svg?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Vitest](https://img.shields.io/badge/Vitest-Unit%20Tested-729B1B.svg?logo=vitest&logoColor=white)](https://vitest.dev/)
-[![ISO Standard](https://img.shields.io/badge/ISO-21771%20Involute-orange.svg)](#mühendislik--matematiksel-altyapı)
-[![Watertight STL](https://img.shields.io/badge/Mesh-100%25%202--Manifold-success.svg)](#-su-geçirmez-watertight-2-manifold-mesh-garantisi)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+<h1 align="center">⚙️ GearForge 3D</h1>
 
-**GearForge 3D**, doğrudan web tarayıcısı üzerinde çalışan; **ISO 21771** uluslararası evolvent standartlarına uygun, 3D yazıcılar ve FDM/SLA dilimleyiciler (Cura, PrusaSlicer, Bambu Studio, OrcaSlicer) için **%100 su geçirmez (watertight, 2-manifold) STL ve OBJ** üreten açık kaynaklı parametrik dişli modelleme ve kinematik simülasyon platformudur.
+<p align="center">
+  <strong>Parametrik 3D Yazıcı Dişli Tasarım &amp; Slicer Stüdyosu</strong><br>
+  <em>Trunçgil Teknoloji © 2026 • Apple Design Mimarisi</em>
+</p>
+
+<p align="center">
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.6-blue.svg?logo=typescript&logoColor=white" alt="TypeScript" /></a>
+  <a href="https://threejs.org/"><img src="https://img.shields.io/badge/Three.js-WebGL-black.svg?logo=three.js&logoColor=white" alt="Three.js" /></a>
+  <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-6.0-646CFF.svg?logo=vite&logoColor=white" alt="Vite" /></a>
+  <a href="https://vitest.dev/"><img src="https://img.shields.io/badge/Vitest-Unit%20Tested-729B1B.svg?logo=vitest&logoColor=white" alt="Vitest" /></a>
+  <a href="#mühendislik--matematiksel-altyapı"><img src="https://img.shields.io/badge/ISO-21771%20Involute-orange.svg" alt="ISO 21771" /></a>
+  <a href="#-su-geçirmez-watertight-2-manifold-mesh-garantisi"><img src="https://img.shields.io/badge/Mesh-100%25%202--Manifold-success.svg" alt="Watertight" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License" /></a>
+</p>
+
+**GearForge 3D**, doğrudan web tarayıcısı üzerinde çalışan; **ISO 21771** uluslararası evolvent standartlarına uygun, 3D yazıcılar ve FDM/SLA dilimleyiciler (Cura, PrusaSlicer, Bambu Studio, OrcaSlicer) için **%100 su geçirmez (watertight, 2-manifold) STL ve OBJ** üreten açık kaynaklı parametrik dişli modelleme ve kinematik simülasyon platformudur. Trunçgil'in radyal dilim geometrisinden ilham alan metalik gövde mimarisi ve Apple Human Interface Guidelines tasarım estetiği ile geliştirilmiştir.
 
 ---
 
@@ -315,6 +326,19 @@ Dişlilerinizin pürüzsüz dönmesi ve kırılmaması için dilimleyicinizde (C
 
 ---
 
+## 🍊 Telif & Sürüm Bilgisi (Credits)
+
+* **Geliştirici & Telif Sahibi:** Trunçgil Teknoloji © 2026
+* **Versiyon Kodu:** `v1.0.4-cad` (Release)
+* **Yapı Kimliği (Build ID):** `2026.10.14-r170`
+* **Geometri Motoru:** ISO 21771 Analitik Evolvent Matematik Çekirdeği
+* **3B Görselleştirme:** Three.js r170 (WebGL 2.0)
+* **Mimari Standart:** SOLID Prensipleri & %100 Su Geçirmez (Watertight 2-Manifold) STL Üreteci
+* **Tasarım Dili:** Apple Human Interface Guidelines & Trunçgil Narenciye Teması
+
+---
+
 ## 📄 Lisans
 
 Bu proje [MIT Lisansı](LICENSE) kapsamında lisanslanmıştır. Ticari ve kişisel projelerinizde dilediğiniz gibi kullanabilir, değiştirebilir ve dağıtabilirsiniz.
+

@@ -4,19 +4,276 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GearForge 3D — Parametrik 3D Yazıcı Dişli Tasarım & STL Üretim Platformu</title>
+    <link rel="icon" type="image/png" href="/gearforge-isometric-icon_no_bg.png" />
+    <link rel="apple-touch-icon" href="/gearforge-isometric-icon_no_bg.png" />
+    <link rel="stylesheet" href="/src/presentation/styles/main.css" />
+    <style>
+      /* Kritik Ön-Yükleyici (FOUC Engelleyici, Sıfır Dış Yük, Hızlı WebP) */
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #070b14;
+        color: #f8fafc;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        overflow: hidden;
+      }
+
+      .app-preloader {
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at center, #0d1527 0%, #060913 100%);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s;
+      }
+
+      .app-preloader.fade-out {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .preloader-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 32px 40px;
+        border-radius: 22px;
+        background: rgba(15, 23, 42, 0.84);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        max-width: 400px;
+        text-align: center;
+      }
+
+      /* Animasyonsuz, 64px WebP Statik Hızlı Logo */
+      .preloader-static-logo-box {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 20px rgba(245, 158, 11, 0.35));
+      }
+
+      .preloader-static-logo-box img {
+        width: 64px;
+        height: 64px;
+        object-fit: contain;
+        display: block;
+      }
+
+      .preloader-text-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+      }
+
+      .preloader-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+
+      .preloader-title {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .preloader-badge {
+        font-size: 10.5px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(234, 88, 12, 0.22));
+        border: 1px solid rgba(245, 158, 11, 0.45);
+        color: #fbbf24;
+      }
+
+      .preloader-meta-line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: 11px;
+        color: #94a3b8;
+      }
+
+      .preloader-version {
+        color: #fbbf24;
+      }
+
+      .preloader-sep {
+        opacity: 0.35;
+      }
+
+      .preloader-year {
+        color: #cbd5e1;
+      }
+
+      .preloader-status {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-bottom: 18px;
+        letter-spacing: -0.01em;
+      }
+
+      .preloader-progress-track {
+        width: 100%;
+        height: 4px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .preloader-progress-bar {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 45%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #0ea5e9, #f59e0b, #ea580c);
+        animation: preloaderProgressAnim 1.4s ease-in-out infinite;
+      }
+
+      @keyframes preloaderProgressAnim {
+        0% { left: -45%; width: 25%; }
+        50% { left: 35%; width: 55%; }
+        100% { left: 100%; width: 30%; }
+      }
+    </style>
   </head>
   <body>
+    <!-- GearForge Hafif, Animasyonsuz 64px WebP Preloader'ı -->
+    <div id="app-preloader" class="app-preloader">
+      <div class="preloader-card">
+        <div class="preloader-static-logo-box">
+          <img src="/gearforge-preloader-64.webp" alt="GearForge 3D Logo" width="64" height="64" />
+        </div>
+
+        <div class="preloader-text-group">
+          <div class="preloader-brand">
+            <span class="preloader-title">GearForge 3D</span>
+            <span class="preloader-badge">Trunçgil Teknoloji</span>
+          </div>
+          <div class="preloader-meta-line">
+            <span class="preloader-version">v1.0.4-cad (Release)</span>
+            <span class="preloader-sep">•</span>
+            <span class="preloader-year">© 2026</span>
+          </div>
+          <p class="preloader-status">ISO 21771 Parametrik Çekirdek &amp; 3B Sahne Yükleniyor...</p>
+          <div class="preloader-progress-track">
+            <div class="preloader-progress-bar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trunçgil Teknoloji Credits & Sürüm Bilgisi Modalı -->
+    <div id="credits-modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="credits-modal-title">
+      <div class="modal-card credits-modal-card">
+        <button id="credits-modal-close" class="modal-close-btn" title="Kapat" aria-label="Kapat">✕</button>
+        <div class="credits-modal-header">
+          <div class="credits-logo-wrapper">
+            <img src="/gearforge-isometric-icon_no_bg.png" alt="GearForge 3D Logo" class="credits-modal-logo" width="88" height="88" />
+          </div>
+          <h2 id="credits-modal-title" class="credits-modal-title">GearForge 3D</h2>
+          <p class="credits-modal-tagline">Parametrik 3D Yazıcı Dişli Tasarım &amp; Slicer Stüdyosu</p>
+        </div>
+
+        <div class="credits-meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Geliştirici &amp; Telif</span>
+            <span class="meta-value highlight-orange">Trunçgil Teknoloji © 2026</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Versiyon Kodu (Version)</span>
+            <span class="meta-value font-mono">v1.0.4-cad (Stable)</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Yapı (Build ID)</span>
+            <span class="meta-value font-mono">2026.10.14-r170</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Geometri Motoru</span>
+            <span class="meta-value">ISO 21771 Involute Math</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Grafik Altyapısı</span>
+            <span class="meta-value font-mono">Three.js r170 (WebGL 2.0)</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Mimari Standart</span>
+            <span class="meta-value">SOLID &amp; Watertight 2-Manifold</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Tasarım Estetiği</span>
+            <span class="meta-value">Apple HIG &amp; Trunçgil Narenciye</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Lisanslama</span>
+            <span class="meta-value">MIT Open Source</span>
+          </div>
+        </div>
+
+        <p class="credits-description">
+          GearForge 3D; <strong>Trunçgil Teknoloji</strong> tarafından hassas mekanik CAD kurallarını, 
+          CNC mil standartlarını ve 3D yazıcı dilimleyici (Slicer) toleranslarını 
+          web üzerinde sıfır kurulum ve %100 yerel gizlilikle sunmak amacıyla tasarlanmıştır.
+        </p>
+
+        <div class="credits-modal-actions">
+          <a href="https://github.com/umitunc/gearforge" target="_blank" rel="noopener noreferrer" class="btn-github-link">
+            <span>GitHub Deposu</span> ↗
+          </a>
+          <button id="credits-modal-ok" class="btn-credits-close">Kapat</button>
+        </div>
+      </div>
+    </div>
+
     <div class="app-shell">
       <header class="app-header">
         <div class="brand-group">
-          <div class="brand-logo">⚙️</div>
-          <h1 class="brand-title">GearForge 3D</h1>
-          <span class="brand-subtitle">ISO 21771 Evolvent CAD &amp; 3D Printer Slicer Studio</span>
+          <div class="brand-logo" id="brand-logo-btn" title="GearForge 3D — Trunçgil Teknoloji (Hakkında / Sürüm)">
+            <img src="/gearforge-isometric-icon_no_bg.png" alt="GearForge 3D Logo" width="38" height="38" />
+          </div>
+          <div class="brand-text-col">
+            <div class="brand-title-line">
+              <h1 class="brand-title">GearForge 3D</h1>
+              <span class="brand-version-pill" id="brand-version-pill">v1.0.4</span>
+            </div>
+            <span class="brand-subtitle">ISO 21771 Evolvent CAD &amp; 3D Printer Slicer Studio</span>
+          </div>
         </div>
         <div class="header-badges">
           <span class="tech-pill">Three.js WebGL</span>
-          <span class="tech-pill">Watertight 2-Manifold STL</span>
-          <span class="tech-pill">SOLID Architecture</span>
+          <span class="tech-pill">Watertight 2-Manifold</span>
+          <button id="btn-open-credits" class="credits-btn" title="Trunçgil Teknoloji Telif &amp; Versiyon Bilgisi">
+            <span class="credits-dot"></span>
+            <span class="credits-label">Trunçgil Teknoloji © 2026</span>
+          </button>
         </div>
       </header>
 
