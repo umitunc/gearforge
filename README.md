@@ -82,19 +82,42 @@ Mekanik tasarım ve 3D baskı dünyasında dişli üretimi çoğu zaman ya aşı
 
 ## 📐 Mühendislik & Matematiksel Altyapı
 
-GearForge 3D, diş profillerini oluştururken analitik evolvent matematiğini kullanır:
+GearForge 3D, diş profillerini ve temas kinematiğini oluştururken analitik evolvent matematiğini kullanır:
 
-```
-Radyan açı (θ) ve Involute fonksiyonu:
-inv(α) = tan(α) - α
+#### 1. Involute (Evolvent) Fonksiyonu
+Kavrama açısı $\alpha$ olan bir diş profili için evolvent polar açısı:
+$$
+\text{inv}(\alpha) = \tan(\alpha) - \alpha
+$$
 
-Taban Dairesi Yarıçapı:
-r_b = r_pitch · cos(α)
+#### 2. Taban Dairesi Yarıçapı ($r_b$)
+Bölüm dairesi yarıçapı $r$ ve kavrama açısı $\alpha$ cinsinden:
+$$
+r_b = r \cdot \cos(\alpha) = \frac{m \cdot z}{2} \cdot \cos(\alpha)
+$$
 
-Kutup Koordinatlarında Evolvent Denklemi:
-r(φ) = r_b · √(1 + φ²)
-θ(φ) = φ - arctan(φ)
-```
+#### 3. Kutup Koordinatlarında Evolvent Parametrik Denklemi
+Hadve açısı $\varphi$ parametresine bağlı yarıçap $r(\varphi)$ ve açı $\theta(\varphi)$:
+$$
+\begin{aligned}
+r(\varphi) &= r_b \cdot \sqrt{1 + \varphi^2} \\
+\theta(\varphi) &= \varphi - \arctan(\varphi)
+\end{aligned}
+$$
+
+#### 4. Dipten Kesilmeyi (Undercut) Önleyen Minimum Diş Sayısı ($z_{\min}$)
+Profil kaydırma katsayısı $x$ ve diş üstü faktörü $h_a^*$ dikkate alındığında:
+$$
+z_{\min} = \left\lceil \frac{2 \cdot h_a^* \cdot (1 - x)}{\sin^2(\alpha)} \right\rceil
+$$
+
+#### 5. Eşleşen Dişli Kavrama Oranı (Contact Ratio - $\varepsilon_\alpha$)
+Sürekli ve titreşimsiz güç aktarımı için $\varepsilon_\alpha \ge 1.20$ olmalıdır:
+$$
+\varepsilon_\alpha = \frac{\sqrt{r_{a1}^2 - r_{b1}^2} + \sqrt{r_{a2}^2 - r_{b2}^2} - a \cdot \sin(\alpha)}{p_b}
+$$
+*(Burada $a$ eksenler arası merkez mesafesi, $p_b = \pi \cdot m \cdot \cos(\alpha)$ ise temel adımdır.)*
+
 
 ### 🛡️ Su Geçirmez (Watertight / 2-Manifold) Mesh Garantisi
 3D dilimleme yazılımlarının katman hatası vermemesi için geometrinin Euler karakteristiği ve topolojik kapalı yüzey kuralı sağlanmalıdır:
