@@ -8,6 +8,7 @@ import { BoreProfileRegistry } from './domain/profiles/bore/BoreProfileRegistry'
 import { InvoluteToothProfileGenerator } from './domain/profiles/tooth/InvoluteToothProfileGenerator';
 import { WebCutoutRegistry } from './domain/profiles/web/WebCutoutRegistry';
 import { ExporterRegistry } from './infrastructure/exporters/ExporterRegistry';
+import { PwaManager } from './infrastructure/pwa/PwaManager';
 import { GearViewportController } from './infrastructure/three/GearViewportController';
 import { EngineeringMetricsView } from './presentation/components/EngineeringMetricsView';
 import { ParameterControlsView } from './presentation/components/ParameterControlsView';
@@ -75,7 +76,11 @@ function bootstrapGearBuilderApp(): void {
   // 5. Trunçgil Teknoloji Telif & Sürüm Bilgisi Modalı Olay Dinleyicileri
   setupCreditsModal();
 
-  // 6. 3B Sahne ve Arayüz hazır olduğunda Preloader'ı yumuşak geçişle kapat
+  // 6. Progressive Web App (PWA) ve Çevrimdışı Yaşam Döngüsü Yöneticisini Başlat
+  const pwaManager = new PwaManager();
+  pwaManager.init();
+
+  // 7. 3B Sahne ve Arayüz hazır olduğunda Preloader'ı yumuşak geçişle kapat
   dismissAppPreloader();
 }
 

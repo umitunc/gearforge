@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "GearForge 3D — Parametrik 3D Dişli Tasarım & Slicer Stüdyosu",
+  "short_name": "GearForge 3D",
+  "description": "ISO 21771 uyumlu parametrik 3D yazıcı dişli modelleme, kinematik simülasyon ve su geçirmez STL üretim stüdyosu. Trunçgil Teknoloji.",
+  "id": "gearforge-3d-truncgil",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#070b14",
+  "theme_color": "#0f172a",
+  "lang": "tr",
+  "dir": "ltr",
+  "categories": ["utilities", "productivity", "graphics", "engineering"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "./pwa-64x64.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "./pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "GearForge 3D Parametrik Dişli Modelleme ve 3B Görselleştirme Stüdyosu"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Standart Düz Dişli (Kamalı)",
+      "short_name": "Düz Dişli",
+      "description": "DIN 6885 kama kanallı endüstriyel düz dişli tasarımı aç",
+      "url": "./#preset=standard_spur_keyway",
+      "icons": [{ "src": "./pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "NEMA 17 Step Motor Pinyonu",
+      "short_name": "NEMA 17",
+      "description": "5 mm D-Mil step motor dişlisi tasarımı aç",
+      "url": "./#preset=nema17_dshaft_pinion",
+      "icons": [{ "src": "./pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Çavuş (Herringbone) Extruder",
+      "short_name": "Çavuş Dişli",
+      "description": "Sessiz çift helisel çavuş dişli modeli oluştur",
+      "url": "./#preset=herringbone_extruder",
+      "icons": [{ "src": "./pwa-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

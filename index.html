@@ -2,10 +2,17 @@
 <html lang="tr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+    <meta name="description" content="ISO 21771 uyumlu parametrik 3D yazıcı dişli modelleme, kinematik simülasyon ve su geçirmez STL üretim stüdyosu. Trunçgil Teknoloji." />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GearForge 3D" />
     <title>GearForge 3D — Parametrik 3D Yazıcı Dişli Tasarım & STL Üretim Platformu</title>
-    <link rel="icon" type="image/png" href="/gearforge-isometric-icon_no_bg.png" />
-    <link rel="apple-touch-icon" href="/gearforge-isometric-icon_no_bg.png" />
+    <link rel="icon" type="image/png" href="./gearforge-isometric-icon_no_bg.png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="/src/presentation/styles/main.css" />
     <style>
       /* Kritik Ön-Yükleyici (FOUC Engelleyici, Sıfır Dış Yük, Hızlı WebP) */
@@ -253,11 +260,33 @@
       </div>
     </div>
 
+    <!-- GearForge PWA Kurulum & Çevrimdışı Kılavuz Modalı -->
+    <div id="pwa-guide-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pwa-guide-title">
+      <div class="modal-card pwa-ios-guide-card">
+        <button id="pwa-guide-modal-close" class="modal-close-btn" title="Kapat" aria-label="Kapat">✕</button>
+        <div class="pwa-guide-header">
+          <img src="./gearforge-isometric-icon_no_bg.png" alt="GearForge 3D Logo" class="pwa-guide-icon" width="68" height="68" />
+          <h3 id="pwa-guide-title" class="pwa-guide-title">GearForge 3D'yi Cihazınıza Yükleyin</h3>
+          <p class="pwa-guide-subtitle">Masaüstü ve mobil ortamda bağımsız pencerede, ultra-hızlı ve %100 çevrimdışı CAD stüdyosu</p>
+        </div>
+
+        <div class="pwa-features-mini-grid">
+          <div class="pwa-feature-pill">⚡ %100 Çevrimdışı CAD</div>
+          <div class="pwa-feature-pill">🖥️ Bağımsız Pencere</div>
+          <div class="pwa-feature-pill">🔒 Sıfır Veri Sızıntısı</div>
+        </div>
+
+        <div id="pwa-guide-instructions" class="pwa-guide-instructions"></div>
+
+        <button id="pwa-guide-modal-ok" class="btn-credits-close" style="width:100%;margin-top:18px;">Anladım</button>
+      </div>
+    </div>
+
     <div class="app-shell">
       <header class="app-header">
         <div class="brand-group">
           <div class="brand-logo" id="brand-logo-btn" title="GearForge 3D — Trunçgil Teknoloji (Hakkında / Sürüm)">
-            <img src="/gearforge-isometric-icon_no_bg.png" alt="GearForge 3D Logo" width="38" height="38" />
+            <img src="./gearforge-isometric-icon_no_bg.png" alt="GearForge 3D Logo" width="38" height="38" />
           </div>
           <div class="brand-text-col">
             <div class="brand-title-line">
@@ -268,6 +297,18 @@
           </div>
         </div>
         <div class="header-badges">
+          <button id="btn-pwa-install" class="pwa-install-btn" title="GearForge 3D Masaüstü / Mobil Uygulamasını Yükleyin">
+            <svg class="pwa-install-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span class="pwa-install-label">Uygulamayı Yükle</span>
+          </button>
+          <div id="pwa-offline-badge" class="pwa-offline-badge hidden" title="Tüm ISO 21771 matematik hesaplamaları ve STL üretimi %100 yerel ve çevrimdışı çalışmaktadır.">
+            <span class="offline-dot"></span>
+            <span class="offline-text">Çevrimdışı CAD</span>
+          </div>
           <span class="tech-pill">Three.js WebGL</span>
           <span class="tech-pill">Watertight 2-Manifold</span>
           <button id="btn-open-credits" class="credits-btn" title="Trunçgil Teknoloji Telif &amp; Versiyon Bilgisi">
