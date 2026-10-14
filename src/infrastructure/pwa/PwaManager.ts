@@ -311,7 +311,7 @@ export class PwaManager {
   }
 
   /**
-   * Credits modalı içerisine PWA & Çevrimdışı mimari bilgisini ekler.
+   * Credits modalı içerisine PWA & Çevrimdışı mimari bilgisini ekler ve tıklandığında kılavuz açar.
    */
   private updatePwaStatusInCredits(): void {
     const metaGrid = document.querySelector('.credits-meta-grid');
@@ -321,13 +321,21 @@ export class PwaManager {
 
     const pwaItem = document.createElement('div');
     pwaItem.id = 'credits-pwa-item';
-    pwaItem.className = 'meta-item';
+    pwaItem.className = 'meta-item clickable-pwa-item';
+    pwaItem.title = 'PWA Kurulum ve Çevrimdışı Çalışma Kılavuzunu Görüntüle';
     pwaItem.innerHTML = `
       <span class="meta-label">PWA &amp; Çevrimdışı Mimari</span>
       <span class="meta-value highlight-cyan">
         ${this.isStandalone ? '🖥️ Masaüstü Standalone (Tam Bağımsız)' : '⚡ Service Worker Aktif (Çevrimdışı Destekli)'}
+        <span class="pwa-guide-link">Kılavuz ↗</span>
       </span>
     `;
+
+    pwaItem.addEventListener('click', () => {
+      const creditsModal = document.getElementById('credits-modal-overlay');
+      if (creditsModal) creditsModal.classList.add('hidden');
+      this.showInstallGuideModal();
+    });
 
     metaGrid.appendChild(pwaItem);
   }
