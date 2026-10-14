@@ -1694,25 +1694,22 @@ body {
   background: linear-gradient(90deg, #090e1a 0%, #0d1527 50%, #090e1a 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
   user-select: none;
-  z-index: 1000;
+  z-index: 10000;
   position: relative;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  overflow: visible !important;
 }
 
 .menubar-left {
   display: flex;
   align-items: center;
   gap: 3px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.menubar-left::-webkit-scrollbar {
-  display: none;
+  overflow: visible !important;
 }
 
 .menubar-item {
   position: relative;
+  overflow: visible !important;
 }
 
 .menubar-btn {
@@ -1757,17 +1754,17 @@ body {
 /* Dropdown Menü Kartı */
 .menubar-dropdown {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 2px);
   left: 0;
   min-width: 250px;
-  background: rgba(13, 21, 39, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0d172e;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 10px;
   padding: 6px;
-  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  z-index: 99999;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  z-index: 100000;
   display: none;
   flex-direction: column;
   gap: 2px;
@@ -1786,7 +1783,10 @@ body {
 }
 
 .menubar-item.is-open .menubar-dropdown {
-  display: flex;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .menubar-dropdown-wide {
