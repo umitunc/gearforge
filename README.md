@@ -86,37 +86,44 @@ GearForge 3D, diş profillerini ve temas kinematiğini oluştururken analitik ev
 
 #### 1. Involute (Evolvent) Fonksiyonu
 Kavrama açısı $\alpha$ olan bir diş profili için evolvent polar açısı:
-$$
+
+```math
 \text{inv}(\alpha) = \tan(\alpha) - \alpha
-$$
+```
 
 #### 2. Taban Dairesi Yarıçapı ($r_b$)
 Bölüm dairesi yarıçapı $r$ ve kavrama açısı $\alpha$ cinsinden:
-$$
+
+```math
 r_b = r \cdot \cos(\alpha) = \frac{m \cdot z}{2} \cdot \cos(\alpha)
-$$
+```
 
 #### 3. Kutup Koordinatlarında Evolvent Parametrik Denklemi
 Hadve açısı $\varphi$ parametresine bağlı yarıçap $r(\varphi)$ ve açı $\theta(\varphi)$:
-$$
+
+```math
 \begin{aligned}
 r(\varphi) &= r_b \cdot \sqrt{1 + \varphi^2} \\
 \theta(\varphi) &= \varphi - \arctan(\varphi)
 \end{aligned}
-$$
+```
 
 #### 4. Dipten Kesilmeyi (Undercut) Önleyen Minimum Diş Sayısı ($z_{\min}$)
-Profil kaydırma katsayısı $x$ ve diş üstü faktörü $h_a^*$ dikkate alındığında:
-$$
+Profil kaydırma katsayısı $x$ ve diş üstü faktörü $h_a$ dikkate alındığında:
+
+```math
 z_{\min} = \left\lceil \frac{2 \cdot h_a^* \cdot (1 - x)}{\sin^2(\alpha)} \right\rceil
-$$
+```
 
 #### 5. Eşleşen Dişli Kavrama Oranı (Contact Ratio - $\varepsilon_\alpha$)
-Sürekli ve titreşimsiz güç aktarımı için $\varepsilon_\alpha \ge 1.20$ olmalıdır:
-$$
+Sürekli ve titreşimsiz güç aktarımı için temas oranı $\varepsilon_\alpha \ge 1.20$ olmalıdır:
+
+```math
 \varepsilon_\alpha = \frac{\sqrt{r_{a1}^2 - r_{b1}^2} + \sqrt{r_{a2}^2 - r_{b2}^2} - a \cdot \sin(\alpha)}{p_b}
-$$
-*(Burada $a$ eksenler arası merkez mesafesi, $p_b = \pi \cdot m \cdot \cos(\alpha)$ ise temel adımdır.)*
+```
+
+> **Not:** Burada $a$ eksenler arası merkez mesafesi, $p_b = \pi \cdot m \cdot \cos(\alpha)$ ise temel adımdır.
+
 
 
 ### 🛡️ Su Geçirmez (Watertight / 2-Manifold) Mesh Garantisi
