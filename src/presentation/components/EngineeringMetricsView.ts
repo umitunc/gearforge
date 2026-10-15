@@ -1,5 +1,14 @@
 import { GearBuilderState, GearBuilderStore } from '../../application/GearBuilderStore';
 import { ExportFormat } from '../../domain/models/GearTypes';
+import katex from 'katex';
+
+function tex(expr: string): string {
+  try {
+    return katex.renderToString(expr, { throwOnError: false });
+  } catch {
+    return expr;
+  }
+}
 
 /**
  * Sağ panelde yer alan 3D yazıcı ihracat (Export) butonları, Manifold doğrulama durumu,
@@ -192,27 +201,27 @@ export class EngineeringMetricsView {
     // Mühendislik Ölçüleri
     const rows: { label: string; value: string; badge?: string }[] = [
       {
-        label: 'Dış Çap / Diş Üstü (da)',
+        label: `Dış Çap / Diş Üstü (${tex('d_a')})`,
         value: `${m.outerDiameter.toFixed(2)} mm`,
         badge: 'Yeşil Çember',
       },
       {
-        label: 'Bölüm Dairesi Çapı (d)',
+        label: `Bölüm Dairesi Çapı (${tex('d')})`,
         value: `${m.pitchDiameter.toFixed(2)} mm`,
         badge: 'Mavi Çember',
       },
       {
-        label: 'Temel Daire Çapı (db)',
+        label: `Temel Daire Çapı (${tex('d_b')})`,
         value: `${m.baseDiameter.toFixed(2)} mm`,
         badge: 'Sarı Çember',
       },
       {
-        label: 'Diş Dibi Çapı (df)',
+        label: `Diş Dibi Çapı (${tex('d_f')})`,
         value: `${m.rootDiameter.toFixed(2)} mm`,
         badge: 'Kırmızı Çember',
       },
       {
-        label: 'Etkin Modül (m)',
+        label: `Etkin Modül (${tex('m')})`,
         value: `${m.effectiveModule.toFixed(3)} mm`,
       },
       {
@@ -220,15 +229,15 @@ export class EngineeringMetricsView {
         value: m.effectiveBoreDiameter > 0 ? `${m.effectiveBoreDiameter.toFixed(2)} mm` : 'Deliksiz',
       },
       {
-        label: 'Çevresel Adım / Taksimat (p)',
+        label: `Çevresel Adım / Taksimat (${tex('p')})`,
         value: `${m.circularPitch.toFixed(2)} mm`,
       },
       {
-        label: 'Diş Kalınlığı (s - Backlash dahil)',
+        label: `Diş Kalınlığı (${tex('s')} - Backlash dahil)`,
         value: `${m.toothThicknessAtPitch.toFixed(2)} mm`,
       },
       {
-        label: 'Diş Yüksekliği (h = ha + hf)',
+        label: `Diş Yüksekliği (${tex('h = h_a + h_f')})`,
         value: `${m.wholeDepth.toFixed(2)} mm`,
       },
       {
@@ -236,15 +245,15 @@ export class EngineeringMetricsView {
         value: `${m.totalAxialHeight.toFixed(2)} mm`,
       },
       {
-        label: 'Kavrama Oranı (εα)',
+        label: `Kavrama Oranı (${tex('\\varepsilon_\\alpha')})`,
         value: m.contactRatio.toFixed(2),
       },
       {
-        label: 'Eksenler Arası Mesafe (a)',
+        label: `Eksenler Arası Mesafe (${tex('a')})`,
         value: `${m.centerDistance.toFixed(2)} mm`,
       },
       {
-        label: 'Çevrim Oranı (i = z₁ / z₂)',
+        label: `Çevrim Oranı (${tex('i = z_1 / z_2')})`,
         value: `1 : ${(1 / m.gearRatio).toFixed(2)} (${m.gearRatio.toFixed(2)})`,
       },
     ];

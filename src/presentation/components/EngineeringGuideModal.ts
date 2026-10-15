@@ -4,6 +4,23 @@
  * Geliştirici: Trunçgil Teknoloji (https://www.truncgil.com.tr)
  */
 
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+
+/**
+ * KaTeX formül render yardımcısı.
+ */
+function tex(latex: string, displayMode = false): string {
+  try {
+    return katex.renderToString(latex, {
+      displayMode,
+      throwOnError: false,
+    });
+  } catch {
+    return `<code class="formula-fallback">${latex}</code>`;
+  }
+}
+
 export class EngineeringGuideModal {
   private modalEl: HTMLElement | null = null;
   private activeTab: 'formulas' | 'fdm' | 'shafts' | 'ai' = 'formulas';
@@ -90,48 +107,190 @@ export class EngineeringGuideModal {
       case 'formulas':
         return `
           <div class="guide-section animate-fade">
-            <h3 class="guide-section-title">ISO 21771 &amp; DIN 867 Evolvent Diş Geometrisi</h3>
-            <p class="guide-text">
-              GearForge 3D, teorik diş profilini <strong>ISO 21771</strong> standardında tanımlanan involute (evolvent) diferansiyel eğri denklemleriyle hesaplar.
-            </p>
-
-            <div class="formula-grid">
-              <div class="formula-card">
-                <span class="formula-name">Bölüm Dairesi Çapı (Pitch Diameter)</span>
-                <code class="formula-code">d = m · z</code>
-                <span class="formula-desc">m: Modül (mm), z: Diş sayısı</span>
-              </div>
-              <div class="formula-card">
-                <span class="formula-name">Temel Dairesi Çapı (Base Diameter)</span>
-                <code class="formula-code">d_b = d · cos(α)</code>
-                <span class="formula-desc">α: Basınç açısı (Standart: 20°)</span>
-              </div>
-              <div class="formula-card">
-                <span class="formula-name">Diş Üstü Çapı (Tip Diameter)</span>
-                <code class="formula-code">d_a = d + 2 · (h_a* + x) · m</code>
-                <span class="formula-desc">h_a*: Diş başı katsayısı (1.0), x: Profil kaydırma</span>
-              </div>
-              <div class="formula-card">
-                <span class="formula-name">Diş Dibi Çapı (Root Diameter)</span>
-                <code class="formula-code">d_f = d - 2 · (h_f* - x) · m</code>
-                <span class="formula-desc">h_f*: Diş dibi katsayısı (1.25)</span>
-              </div>
-              <div class="formula-card">
-                <span class="formula-name">Dairesel Hatve (Circular Pitch)</span>
-                <code class="formula-code">p = π · m</code>
-                <span class="formula-desc">Dişler arası ardışık yay uzunluğu</span>
-              </div>
-              <div class="formula-card">
-                <span class="formula-name">Bölüm Dairesinde Diş Kalınlığı</span>
-                <code class="formula-code">s = (π · m / 2) + 2 · x · m · tan(α) - j_t</code>
-                <span class="formula-desc">j_t: Uygulanan teğetsel backlash (boşluk)</span>
+            <div class="guide-section-header-row">
+              <div>
+                <h3 class="guide-section-title">ISO 21771 &amp; DIN 867 Evolvent Diş Geometrisi</h3>
+                <p class="guide-text">
+                  GearForge 3D, teorik diş profilini <strong>ISO 21771</strong> standardında tanımlanan involute (evolvent) diferansiyel eğri denklemleriyle hesaplar.
+                </p>
               </div>
             </div>
 
-            <div class="guide-callout info">
-              <strong>Evolvent Eğri Fonksiyonu:</strong>
-              <code>inv(α) = tan(α) - α</code> formülü uyarınca her profil noktasının koordinatları 
-              <code>x(θ) = r_b · (cos(θ) + θ · sin(θ))</code> ve <code>y(θ) = r_b · (sin(θ) - θ · cos(θ))</code> olarak türetilir.
+            <div class="formula-grid">
+              <div class="formula-card">
+                <div class="formula-card-top">
+                  <span class="formula-name">Bölüm Dairesi Çapı (Pitch Diameter)</span>
+                  <button class="btn-copy-latex" data-latex="d = m \\cdot z" title="LaTeX Kodunu Kopyala" aria-label="LaTeX Kodunu Kopyala">
+                    <span class="copy-icon">📋</span> LaTeX
+                  </button>
+                </div>
+                <div class="formula-latex">
+                  ${tex('d = m \\cdot z', true)}
+                </div>
+                <div class="formula-desc">
+                  <span>${tex('m')}: Modül (mm)</span>
+                  <span class="desc-sep">•</span>
+                  <span>${tex('z')}: Diş sayısı</span>
+                </div>
+              </div>
+
+              <div class="formula-card">
+                <div class="formula-card-top">
+                  <span class="formula-name">Temel Dairesi Çapı (Base Diameter)</span>
+                  <button class="btn-copy-latex" data-latex="d_b = d \\cdot \\cos\\alpha" title="LaTeX Kodunu Kopyala" aria-label="LaTeX Kodunu Kopyala">
+                    <span class="copy-icon">📋</span> LaTeX
+                  </button>
+                </div>
+                <div class="formula-latex">
+                  ${tex('d_b = d \\cdot \\cos\\alpha', true)}
+                </div>
+                <div class="formula-desc">
+                  <span>${tex('\\alpha')}: Basınç açısı (Standart: ${tex('20^\\circ')})</span>
+                </div>
+              </div>
+
+              <div class="formula-card">
+                <div class="formula-card-top">
+                  <span class="formula-name">Diş Üstü Çapı (Tip Diameter)</span>
+                  <button class="btn-copy-latex" data-latex="d_a = d + 2 \\cdot (h_a^* + x) \\cdot m" title="LaTeX Kodunu Kopyala" aria-label="LaTeX Kodunu Kopyala">
+                    <span class="copy-icon">📋</span> LaTeX
+                  </button>
+                </div>
+                <div class="formula-latex">
+                  ${tex('d_a = d + 2 \\cdot (h_a^* + x) \\cdot m', true)}
+                </div>
+                <div class="formula-desc">
+                  <span>${tex('h_a^*')}: Diş başı katsayısı (${tex('1.0')})</span>
+                  <span class="desc-sep">•</span>
+                  <span>${tex('x')}: Profil kaydırma</span>
+                </div>
+              </div>
+
+              <div class="formula-card">
+                <div class="formula-card-top">
+                  <span class="formula-name">Diş Dibi Çapı (Root Diameter)</span>
+                  <button class="btn-copy-latex" data-latex="d_f = d - 2 \\cdot (h_f^* - x) \\cdot m" title="LaTeX Kodunu Kopyala" aria-label="LaTeX Kodunu Kopyala">
+                    <span class="copy-icon">📋</span> LaTeX
+                  </button>
+                </div>
+                <div class="formula-latex">
+                  ${tex('d_f = d - 2 \\cdot (h_f^* - x) \\cdot m', true)}
+                </div>
+                <div class="formula-desc">
+                  <span>${tex('h_f^*')}: Diş dibi katsayısı (${tex('1.25')})</span>
+                </div>
+              </div>
+
+              <div class="formula-card">
+                <div class="formula-card-top">
+                  <span class="formula-name">Dairesel Hatve (Circular Pitch)</span>
+                  <button class="btn-copy-latex" data-latex="p = \\pi \\cdot m = \\frac{\\pi \\cdot d}{z}" title="LaTeX Kodunu Kopyala" aria-label="LaTeX Kodunu Kopyala">
+                    <span class="copy-icon">📋</span> LaTeX
+                  </button>
+                </div>
+                <div class="formula-latex">
+                  ${tex('p = \\pi \\cdot m', true)}
+                </div>
+                <div class="formula-desc">
+                  <span>Dişler arası ardışık yay uzunluğu (${tex('p = \\frac{\\pi \\cdot d}{z}')})</span>
+                </div>
+              </div>
+
+              <div class="formula-card">
+                <div class="formula-card-top">
+                  <span class="formula-name">Bölüm Dairesinde Diş Kalınlığı</span>
+                  <button class="btn-copy-latex" data-latex="s = \\frac{\\pi \\cdot m}{2} + 2 \\cdot x \\cdot m \\cdot \\tan\\alpha - j_t" title="LaTeX Kodunu Kopyala" aria-label="LaTeX Kodunu Kopyala">
+                    <span class="copy-icon">📋</span> LaTeX
+                  </button>
+                </div>
+                <div class="formula-latex">
+                  ${tex('s = \\frac{\\pi \\cdot m}{2} + 2 \\cdot x \\cdot m \\cdot \\tan\\alpha - j_t', true)}
+                </div>
+                <div class="formula-desc">
+                  <span>${tex('j_t')}: Uygulanan teğetsel backlash (boşluk payı)</span>
+                </div>
+              </div>
+
+              <div class="formula-card">
+                <div class="formula-card-top">
+                  <span class="formula-name">Eksenler Arası Mesafe (Center Distance)</span>
+                  <button class="btn-copy-latex" data-latex="a = \\frac{d_1 + d_2}{2} = \\frac{m \\cdot (z_1 + z_2)}{2}" title="LaTeX Kodunu Kopyala" aria-label="LaTeX Kodunu Kopyala">
+                    <span class="copy-icon">📋</span> LaTeX
+                  </button>
+                </div>
+                <div class="formula-latex">
+                  ${tex('a = \\frac{d_1 + d_2}{2} = \\frac{m \\cdot (z_1 + z_2)}{2}', true)}
+                </div>
+                <div class="formula-desc">
+                  <span>${tex('z_1, z_2')}: Eş çalışan dişli çifti diş sayıları</span>
+                </div>
+              </div>
+
+              <div class="formula-card">
+                <div class="formula-card-top">
+                  <span class="formula-name">Toplam Diş Derinliği (Whole Depth)</span>
+                  <button class="btn-copy-latex" data-latex="h = h_a + h_f = 2.25 \\cdot m" title="LaTeX Kodunu Kopyala" aria-label="LaTeX Kodunu Kopyala">
+                    <span class="copy-icon">📋</span> LaTeX
+                  </button>
+                </div>
+                <div class="formula-latex">
+                  ${tex('h = h_a + h_f = 2.25 \\cdot m', true)}
+                </div>
+                <div class="formula-desc">
+                  <span>${tex('h_a = 1.0\\,m')}: Diş başı</span>
+                  <span class="desc-sep">•</span>
+                  <span>${tex('h_f = 1.25\\,m')}: Diş dibi</span>
+                </div>
+              </div>
+
+              <div class="formula-card">
+                <div class="formula-card-top">
+                  <span class="formula-name">Helis Dişli Alın Modülü (Transverse Module)</span>
+                  <button class="btn-copy-latex" data-latex="m_t = \\frac{m_n}{\\cos\\beta}, \\quad \\tan\\alpha_t = \\frac{\\tan\\alpha_n}{\\cos\\beta}" title="LaTeX Kodunu Kopyala" aria-label="LaTeX Kodunu Kopyala">
+                    <span class="copy-icon">📋</span> LaTeX
+                  </button>
+                </div>
+                <div class="formula-latex">
+                  ${tex('m_t = \\frac{m_n}{\\cos\\beta}, \\quad \\tan\\alpha_t = \\frac{\\tan\\alpha_n}{\\cos\\beta}', true)}
+                </div>
+                <div class="formula-desc">
+                  <span>${tex('\\beta')}: Helis açısı</span>
+                  <span class="desc-sep">•</span>
+                  <span>${tex('m_n')}: Normal modül</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="guide-latex-highlight-card">
+              <div class="guide-latex-card-header">
+                <div class="guide-latex-title-group">
+                  <span class="guide-badge-cyan">Diferansiyel Geometri</span>
+                  <h4 class="guide-latex-card-title">Evolvent (İnvolute) Eğri Fonksiyonu &amp; Parametrik Koordinatlar</h4>
+                </div>
+                <button class="btn-copy-latex" data-latex="\\operatorname{inv}(\\alpha) = \\tan\\alpha - \\alpha \\\\ x(\\theta) = r_b \\cdot (\\cos\\theta + \\theta \\cdot \\sin\\theta) \\\\ y(\\theta) = r_b \\cdot (\\sin\\theta - \\theta \\cdot \\cos\\theta)" title="LaTeX Kodunu Kopyala">
+                  <span class="copy-icon">📋</span> LaTeX
+                </button>
+              </div>
+              <p class="guide-latex-card-desc">
+                ISO 21771 standardı uyarınca diş profilinin kusursuz yuvarlanma (rolling contact) teması sağlaması için involut açısı ${tex('\\alpha')} ve evolvent yay parametresi ${tex('\\theta \\ge 0')} kullanılarak profil noktaları analitik olarak türetilir:
+              </p>
+              <div class="guide-latex-math-row">
+                <div class="latex-math-block">
+                  <span class="latex-math-label">İnvolut (Evolvent) Açı Fonksiyonu:</span>
+                  <div class="formula-latex">
+                    ${tex('\\operatorname{inv}(\\alpha) = \\tan\\alpha - \\alpha', true)}
+                  </div>
+                </div>
+                <div class="latex-math-block">
+                  <span class="latex-math-label">Kartezyen Düzlem Parametrik Koordinatları:</span>
+                  <div class="formula-latex">
+                    ${tex('\\begin{cases} x(\\theta) = r_b \\cdot (\\cos\\theta + \\theta \\cdot \\sin\\theta) \\\\[4pt] y(\\theta) = r_b \\cdot (\\sin\\theta - \\theta \\cdot \\cos\\theta) \\end{cases}', true)}
+                  </div>
+                </div>
+              </div>
+              <div class="guide-latex-card-footer">
+                <span class="footer-note">Burada ${tex('r_b = \\frac{d_b}{2}')} temel daire yarıçapı, ${tex('\\theta')} temel daireden açılan evolvent yay açısıdır (radyan).</span>
+              </div>
             </div>
           </div>
         `;
@@ -142,15 +301,15 @@ export class EngineeringGuideModal {
             <h3 class="guide-section-title">3D Yazıcı (FDM / SLA) Dişli Üretim ve Backlash Rehberi</h3>
             <p class="guide-text">
               FDM tipi 3D yazıcılarda ergimiş termoplastiğin soğuma büzülmesi (shrinkage) ve nozül köşe yayılması nedeniyle dişliler birbirine sürtünebilir.
-              GearForge 3D'nin <strong>Backlash</strong> ve <strong>Bore Clearance</strong> parametreleri ile dilimleyici (slicer) seviyesinde sıfır sıkışma garantilenir.
+              GearForge 3D'nin <strong>Backlash (${tex('j_t')})</strong> ve <strong>Delik Toleransı (${tex('\\Delta d')})</strong> parametreleri ile dilimleyici (slicer) seviyesinde sıfır sıkışma garantilenir.
             </p>
 
             <table class="guide-table">
               <thead>
                 <tr>
                   <th>Filament Malzemesi</th>
-                  <th>Önerilen Backlash (j_t)</th>
-                  <th>Delik Toleransı</th>
+                  <th>Önerilen Backlash (${tex('j_t')})</th>
+                  <th>Delik Toleransı (${tex('\\Delta d')})</th>
                   <th>Dilimleyici Duvar Sayısı</th>
                 </tr>
               </thead>
@@ -200,48 +359,48 @@ export class EngineeringGuideModal {
             <table class="guide-table">
               <thead>
                 <tr>
-                  <th>Mil Çapı (d_shaft)</th>
-                  <th>Kama Genişliği (b)</th>
-                  <th>Kama Yüksekliği (h)</th>
-                  <th>Göbek Derinliği (t2)</th>
+                  <th>Mil Çapı (${tex('d_{\\text{mil}}')})</th>
+                  <th>Kama Genişliği (${tex('b')})</th>
+                  <th>Kama Yüksekliği (${tex('h')})</th>
+                  <th>Göbek Derinliği (${tex('t_2')})</th>
                   <th>Uygulama Alanı</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Ø 6 - 8 mm</strong></td>
+                  <td><strong>${tex('\\varnothing')} 6 - 8 mm</strong></td>
                   <td>2.0 mm</td>
                   <td>2.0 mm</td>
                   <td>1.0 mm</td>
                   <td>Küçük Mekatronik &amp; RC</td>
                 </tr>
                 <tr>
-                  <td><strong>Ø 8 - 10 mm</strong></td>
+                  <td><strong>${tex('\\varnothing')} 8 - 10 mm</strong></td>
                   <td>3.0 mm</td>
                   <td>3.0 mm</td>
                   <td>1.4 mm</td>
                   <td>Step Motorlar &amp; Şaftlar</td>
                 </tr>
                 <tr>
-                  <td><strong>Ø 10 - 12 mm</strong></td>
+                  <td><strong>${tex('\\varnothing')} 10 - 12 mm</strong></td>
                   <td>4.0 mm</td>
                   <td>4.0 mm</td>
                   <td>1.8 mm</td>
                   <td>Standart Redüktör Girişleri</td>
                 </tr>
                 <tr>
-                  <td><strong>Ø 12 - 17 mm</strong></td>
+                  <td><strong>${tex('\\varnothing')} 12 - 17 mm</strong></td>
                   <td>5.0 mm</td>
                   <td>5.0 mm</td>
                   <td>2.3 mm</td>
                   <td>Endüstriyel Tahrik</td>
                 </tr>
                 <tr>
-                  <td><strong>NEMA 17 (D-Cut)</strong></td>
+                  <td><strong>NEMA 17 (D-Cut) (${tex('\\varnothing 5\\text{ mm}')})</strong></td>
                   <td>—</td>
                   <td>—</td>
                   <td>0.5 mm D-Düzlüğü</td>
-                  <td>3D Yazıcı Step Motorları (Ø5 mm)</td>
+                  <td>3D Yazıcı Step Motorları (${tex('\\varnothing 5\\text{ mm}')})</td>
                 </tr>
               </tbody>
             </table>
@@ -329,6 +488,30 @@ export class EngineeringGuideModal {
     };
     document.addEventListener('keydown', handleKeydown);
 
+    // LaTeX Kopyalama Butonları
+    const bindCopyButtons = () => {
+      const copyBtns = overlay.querySelectorAll<HTMLButtonElement>('.btn-copy-latex');
+      copyBtns.forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const latexCode = btn.dataset.latex;
+          if (!latexCode) return;
+          try {
+            await navigator.clipboard.writeText(latexCode);
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<span class="copy-icon">✓</span> Kopyalandı';
+            btn.classList.add('copied');
+            setTimeout(() => {
+              btn.innerHTML = originalHtml;
+              btn.classList.remove('copied');
+            }, 1800);
+          } catch (err) {
+            console.error('LaTeX kopyalanamadı:', err);
+          }
+        });
+      });
+    };
+
     // Sekme geçişleri
     const tabButtons = overlay.querySelectorAll<HTMLButtonElement>('.guide-tab-btn');
     const contentArea = overlay.querySelector('#guide-tab-content-area');
@@ -342,9 +525,12 @@ export class EngineeringGuideModal {
           btn.classList.add('active');
           if (contentArea) {
             contentArea.innerHTML = this.renderTabContent();
+            bindCopyButtons();
           }
         }
       });
     });
+
+    bindCopyButtons();
   }
 }
