@@ -1,14 +1,15 @@
 {
   "name": "gearforge-3d-builder",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "Parametric 3D Printable Involute Gear Builder built with Three.js and SOLID Architecture",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "publish": "node scripts/publish.js"
   },
   "dependencies": {
     "katex": "^0.19.0",
