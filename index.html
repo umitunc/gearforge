@@ -61,7 +61,7 @@
           "applicationCategory": "DesignApplication",
           "operatingSystem": "Web Browser, Windows, macOS, Linux, Android, iOS",
           "browserRequirements": "Requires WebGL 2.0 support",
-          "softwareVersion": "1.0.5-cad",
+          "softwareVersion": "1.0.6-cad",
           "description": "ISO 21771 standardında evolvent dişli çark modelleme, 3D yazıcı (FDM/SLA) için dilimleyiciye hazır su geçirmez (watertight 2-manifold) binary STL/OBJ üretimi ve kinematik simülasyon stüdyosu.",
           "offers": {
             "@type": "Offer",
@@ -368,7 +368,7 @@
             <span class="preloader-badge">Trunçgil Teknoloji</span>
           </div>
           <div class="preloader-meta-line">
-            <span class="preloader-version">v1.0.5-cad (Release)</span>
+            <span class="preloader-version">v1.0.6-cad (Release)</span>
             <span class="preloader-sep">•</span>
             <span class="preloader-year">© 2026</span>
           </div>
@@ -399,11 +399,11 @@
           </div>
           <div class="meta-item">
             <span class="meta-label">Versiyon Kodu (Version)</span>
-            <span class="meta-value font-mono">v1.0.5-cad (Stable)</span>
+            <span class="meta-value font-mono">v1.0.6-cad (Stable)</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Yapı (Build ID)</span>
-            <span class="meta-value font-mono">2026.10.15-r170.5</span>
+            <span class="meta-value font-mono">2026.10.16-r170.6</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Geometri Motoru</span>
@@ -473,7 +473,7 @@
           <div class="brand-text-col">
             <div class="brand-title-line">
               <h1 class="brand-title">GearForge 3D</h1>
-              <span class="brand-version-pill" id="brand-version-pill">v1.0.5</span>
+              <span class="brand-version-pill" id="brand-version-pill">v1.0.6</span>
             </div>
             <span class="brand-subtitle">ISO 21771 Evolvent CAD &amp; 3D Printer Slicer Studio</span>
           </div>
@@ -502,15 +502,23 @@
 
       <nav id="app-menubar" class="app-menubar" aria-label="Ana Menü Çubuğu"></nav>
 
+      <!-- Üst Yatay Swipe Kategori Çubuğu (Bölüm Seçici) -->
+      <div id="swipe-category-container" class="swipe-category-container"></div>
+
       <main class="app-workspace">
         <aside id="left-parameter-panel" class="sidebar-left"></aside>
 
         <section id="viewport-stage" class="viewport-stage">
           <div id="viewport-canvas-host" class="viewport-canvas-host"></div>
+          <!-- 3B Sahne Canlı CAD Ölçü Göstergesi (HUD) -->
+          <div id="viewport-dimension-container" class="viewport-dimension-container"></div>
         </section>
 
         <aside id="right-metrics-panel" class="sidebar-right"></aside>
       </main>
+
+      <!-- Mobil Uyumlu Alt Çekmece (Bottom Sheet & Eylem Çubuğu) -->
+      <div id="mobile-drawer-host" class="mobile-drawer-host"></div>
 
       <!-- =====================================================================
            SEO & GEO (GENERATIVE ENGINE OPTIMIZATION) KNOWLEDGE CORPUS

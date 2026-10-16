@@ -30,6 +30,7 @@ export class ParameterControlsView {
   private readonly store: GearBuilderStore;
   private readonly fieldUpdaters = new Map<string, (state: GearBuilderState) => void>();
   private readonly sectionElements = new Map<GearHighlightSection, HTMLElement>();
+  private isAccordionMode = true;
 
   constructor(container: HTMLElement, store: GearBuilderStore) {
     this.container = container;
@@ -38,8 +39,45 @@ export class ParameterControlsView {
     this.store.subscribe((state) => this.syncValues(state));
   }
 
+  public getSectionElement(section: GearHighlightSection): HTMLElement | undefined {
+    return this.sectionElements.get(section);
+  }
+
+  public setAccordionMode(enabled: boolean): void {
+    this.isAccordionMode = enabled;
+  }
+
+  public openSection(section: GearHighlightSection, scrollIntoView = true): void {
+    const target = this.sectionElements.get(section);
+    if (!target) return;
+
+    if (target instanceof HTMLDetailsElement) {
+      target.open = true;
+    }
+
+    if (this.isAccordionMode) {
+      for (const [sec, el] of this.sectionElements) {
+        if (sec !== section && el instanceof HTMLDetailsElement) {
+          el.open = false;
+        }
+      }
+    }
+
+    if (scrollIntoView) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    target.classList.remove('section-pulse-highlight');
+    void target.offsetWidth;
+    target.classList.add('section-pulse-highlight');
+    window.setTimeout(() => target.classList.remove('section-pulse-highlight'), 1200);
+  }
+
   private render(): void {
     this.container.innerHTML = '';
+
+    // Görünüm Düzeni Seçici (Akordiyon / Tümünü Aç)
+    this.container.appendChild(this.buildModeToggleBar());
 
     // 0. Hazır Şablonlar (Presets) Seçici
     this.container.appendChild(this.buildPresetSection());
@@ -525,6 +563,61 @@ export class ParameterControlsView {
     );
   }
 
+  private buildModeToggleBar(): HTMLElement {
+    const bar = document.createElement('div');
+    bar.className = 'section-view-mode-bar';
+
+    const label = document.createElement('span');
+    label.className = 'mode-bar-label';
+    label.textContent = 'Görünüm Düzeni:';
+
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'mode-btn-group';
+
+    const accordionBtn = document.createElement('button');
+    accordionBtn.type = 'button';
+    accordionBtn.className = `mode-toggle-btn btn-mode-accordion ${this.isAccordionMode ? 'active' : ''}`;
+    accordionBtn.textContent = '🎯 Tekli Odak (Kompakt)';
+    accordionBtn.title = 'Sadece aktif bölümü açık tutar, dikey kaydırmayı azaltır';
+
+    const allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.className = `mode-toggle-btn btn-mode-all ${!this.isAccordionMode ? 'active' : ''}`;
+    allBtn.textContent = '📋 Tümünü Aç';
+    allBtn.title = 'Tüm bölümleri açık tutar';
+
+    accordionBtn.addEventListener('click', () => {
+      this.isAccordionMode = true;
+      accordionBtn.classList.add('active');
+      allBtn.classList.remove('active');
+      let keptOne = false;
+      for (const el of this.sectionElements.values()) {
+        if (el instanceof HTMLDetailsElement) {
+          if (!keptOne && el.open) {
+            keptOne = true;
+          } else {
+            el.open = false;
+          }
+        }
+      }
+    });
+
+    allBtn.addEventListener('click', () => {
+      this.isAccordionMode = false;
+      allBtn.classList.add('active');
+      accordionBtn.classList.remove('active');
+      for (const el of this.sectionElements.values()) {
+        if (el instanceof HTMLDetailsElement) {
+          el.open = true;
+        }
+      }
+    });
+
+    btnGroup.append(accordionBtn, allBtn);
+    bar.append(label, btnGroup);
+    return bar;
+  }
+
   private buildPresetSection(): HTMLElement {
     const wrapper = document.createElement('div');
     wrapper.className = 'preset-bar';
@@ -582,7 +675,17 @@ export class ParameterControlsView {
   ): HTMLElement {
     const details = document.createElement('details');
     details.className = `param-section zone-${highlightSection}`;
-    details.open = true;
+    details.open = highlightSection === GearHighlightSection.DIMENSIONS_AND_TYPE || !this.isAccordionMode;
+
+    details.addEventListener('toggle', () => {
+      if (details.open && this.isAccordionMode) {
+        for (const [sec, el] of this.sectionElements) {
+          if (sec !== highlightSection && el instanceof HTMLDetailsElement && el.open) {
+            el.open = false;
+          }
+        }
+      }
+    });
 
     const summary = document.createElement('summary');
     summary.className = 'param-section-header';

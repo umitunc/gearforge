@@ -40,16 +40,19 @@ export class ViewportOverlayToolbar {
   private readonly container: HTMLElement;
   private readonly viewport: GearViewportController;
   private readonly store: GearBuilderStore;
+  private readonly onToggleDimensionOverlay?: (active: boolean) => void;
   private highlightBannerEl!: HTMLElement;
 
   constructor(
     container: HTMLElement,
     viewport: GearViewportController,
-    store: GearBuilderStore
+    store: GearBuilderStore,
+    onToggleDimensionOverlay?: (active: boolean) => void
   ) {
     this.container = container;
     this.viewport = viewport;
     this.store = store;
+    this.onToggleDimensionOverlay = onToggleDimensionOverlay;
     this.render();
     this.store.subscribe((state) => {
       this.updateHighlightBanner(state.activeHighlightSection);
@@ -75,6 +78,12 @@ export class ViewportOverlayToolbar {
     toggleGroup.className = 'toolbar-group';
 
     const opts = this.viewport.getDisplayOptions();
+
+    const dimPill = this.createTogglePill(
+      '📐 Canlı Ölçüler (HUD)',
+      true,
+      (active) => this.onToggleDimensionOverlay?.(active)
+    );
 
     const playPill = this.createTogglePill(
       '⟳ Dönüş Simülasyonu',
@@ -106,7 +115,7 @@ export class ViewportOverlayToolbar {
       (active) => this.viewport.setDisplayOptions({ showBuildPlate: active })
     );
 
-    toggleGroup.append(playPill, pitchPill, sectionPill, wirePill, gridPill);
+    toggleGroup.append(dimPill, playPill, pitchPill, sectionPill, wirePill, gridPill);
     toolbar.append(camGroup, toggleGroup);
 
     // Aktif Vurgulanan Bölge (Highlight Zone) HUD Çubuğu

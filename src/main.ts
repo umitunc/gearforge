@@ -13,10 +13,14 @@ import { LocalStorageProjectRepository } from './infrastructure/storage/LocalSto
 import { GearViewportController } from './infrastructure/three/GearViewportController';
 import { AppMenuBar } from './presentation/components/AppMenuBar';
 import { EngineeringMetricsView } from './presentation/components/EngineeringMetricsView';
+import { MobileDrawerSheet } from './presentation/components/MobileDrawerSheet';
 import { ParameterControlsView } from './presentation/components/ParameterControlsView';
 import { ProjectManagerModal } from './presentation/components/ProjectManagerModal';
 import { SaveProjectModal } from './presentation/components/SaveProjectModal';
+import { SwipeCategoryBar } from './presentation/components/SwipeCategoryBar';
+import { ViewportDimensionOverlay } from './presentation/components/ViewportDimensionOverlay';
 import { ViewportOverlayToolbar } from './presentation/components/ViewportOverlayToolbar';
+import { GearHighlightSection } from './domain/models/GearTypes';
 import './presentation/styles/main.css';
 
 /**
@@ -28,6 +32,9 @@ function bootstrapGearBuilderApp(): void {
   const canvasHost = document.getElementById('viewport-canvas-host');
   const rightPanel = document.getElementById('right-metrics-panel');
   const menubarEl = document.getElementById('app-menubar');
+  const swipeContainer = document.getElementById('swipe-category-container');
+  const dimensionContainer = document.getElementById('viewport-dimension-container');
+  const mobileDrawerHost = document.getElementById('mobile-drawer-host');
 
   if (!leftPanel || !viewportStage || !canvasHost || !rightPanel) {
     throw new Error('Uygulama DOM konteynerleri bulunamadı.');
@@ -91,8 +98,89 @@ function bootstrapGearBuilderApp(): void {
   }
 
   // 6. UI Görünüm Bileşenlerini bağla
-  new ViewportOverlayToolbar(viewportStage, viewportController, store);
-  new ParameterControlsView(leftPanel, store);
+  const parameterControlsView = new ParameterControlsView(leftPanel, store);
+
+  // 7. 3B Sahne Üzeri Canlı Ölçü Göstergesi (CAD Dimension HUD)
+  const dimensionOverlay = dimensionContainer
+    ? new ViewportDimensionOverlay(dimensionContainer, store, (section) => {
+        store.setActiveHighlightSection(section);
+        swipeBar?.setActive(section, true);
+        if (window.innerWidth <= 960) {
+          mobileDrawer?.openToSection(section);
+        } else {
+          parameterControlsView.openSection(section, true);
+        }
+      })
+    : null;
+
+  // 8. Viewport Overlay Araç Çubuğu (Toolbar)
+  new ViewportOverlayToolbar(
+    viewportStage,
+    viewportController,
+    store,
+    (active) => dimensionOverlay?.toggleVisibility(active)
+  );
+
+  // 9. Üst Yatay Swipe Kategori Çubuğu (Swipe Panel)
+  const swipeBar = swipeContainer
+    ? new SwipeCategoryBar(swipeContainer, store, (catId) => {
+        if (catId === 'iso_metrics' || catId === 'export_stl') {
+          if (window.innerWidth <= 960) {
+            mobileDrawer?.openToSection(catId);
+          } else {
+            rightPanel.scrollIntoView({ behavior: 'smooth' });
+          }
+        } else {
+          const section = catId as GearHighlightSection;
+          store.setActiveHighlightSection(section);
+          dimensionOverlay?.setActiveSection(section);
+          if (window.innerWidth <= 960) {
+            mobileDrawer?.openToSection(section);
+          } else {
+            parameterControlsView.openSection(section, true);
+          }
+        }
+      })
+    : null;
+
+  // 10. Mobil Alt Çekmece (Mobile Drawer Sheet)
+  const mobileDrawer = mobileDrawerHost
+    ? new MobileDrawerSheet(
+        mobileDrawerHost,
+        store,
+        parameterControlsView,
+        () => saveModal.open(false),
+        () => projectManagerModal.open(),
+        (mode) => {
+          // Drawer açıkken (half veya full) mobilde HUD'ı gizle, kapandığında geri aç
+          if (window.innerWidth <= 960) {
+            dimensionOverlay?.toggleVisibility(mode === 'hidden');
+          }
+        }
+      )
+    : null;
+
+  // 11. 3D Dişli Parçasına Tıklama (Raycast Hit) Olayını Bağla
+  // "dişlinin hangi bölgesine tıklarsak o bölgesinde işlem yapılacak section direkt ekranda açılabilir"
+  viewportController.onZoneClick = (section) => {
+    store.setActiveHighlightSection(section);
+    dimensionOverlay?.setActiveSection(section);
+    swipeBar?.setActive(section, true);
+
+    if (window.innerWidth <= 960) {
+      mobileDrawer?.openToSection(section);
+    } else {
+      parameterControlsView.openSection(section, true);
+    }
+  };
+
+  // 12. 3D Dişli Parçası Üzerine Gelme (Hover) Canlı Ölçü Olayını Bağla
+  // "bir de ölçüler vs. ekranda gözükebilir direkt 3d dişli objesinde neyin üzerine gelirsek"
+  viewportController.onZoneHover = (section) => {
+    dimensionOverlay?.setHoverSection(section);
+  };
+
+  // 13. Mühendislik Metrikleri Görünümü
   new EngineeringMetricsView(
     rightPanel,
     store,
@@ -100,14 +188,14 @@ function bootstrapGearBuilderApp(): void {
     () => projectManagerModal.open()
   );
 
-  // 7. Trunçgil Teknoloji Telif & Sürüm Bilgisi Modalı Olay Dinleyicileri
+  // 14. Trunçgil Teknoloji Telif & Sürüm Bilgisi Modalı Olay Dinleyicileri
   setupCreditsModal();
 
-  // 8. Progressive Web App (PWA) ve Çevrimdışı Yaşam Döngüsü Yöneticisini Başlat
+  // 15. Progressive Web App (PWA) ve Çevrimdışı Yaşam Döngüsü Yöneticisini Başlat
   const pwaManager = new PwaManager();
   pwaManager.init();
 
-  // 9. 3B Sahne ve Arayüz hazır olduğunda Preloader'ı yumuşak geçişle kapat
+  // 16. 3B Sahne ve Arayüz hazır olduğunda Preloader'ı yumuşak geçişle kapat
   dismissAppPreloader();
 }
 

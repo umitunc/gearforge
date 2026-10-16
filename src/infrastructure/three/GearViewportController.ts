@@ -76,8 +76,27 @@ export class GearViewportController {
   private primaryAngleRad = 0;
   private pulseTime = 0;
   private lastFrameTime = performance.now();
-  private animationFrameId: number | null = null;
+  private animationFrameId = 0;
   private resizeObserver: ResizeObserver | null = null;
+  private readonly raycaster = new THREE.Raycaster();
+  private isPointerDown = false;
+  private pointerDownPos = { x: 0, y: 0 };
+  private pointerDownTime = 0;
+  private hoverHighlight: GearHighlightSection = GearHighlightSection.NONE;
+  private pointerMoveListener?: (e: PointerEvent) => void;
+  private pointerUpListener?: (e: PointerEvent) => void;
+
+  public onZoneClick?: (
+    section: GearHighlightSection,
+    hitPoint: THREE.Vector3,
+    screenPos: { x: number; y: number }
+  ) => void;
+
+  public onZoneHover?: (
+    section: GearHighlightSection | null,
+    hitPoint: THREE.Vector3 | null,
+    screenPos: { x: number; y: number } | null
+  ) => void;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -151,6 +170,7 @@ export class GearViewportController {
     this.setupLighting();
     this.setupBuildPlateGrid();
     this.setupResizeHandling();
+    this.setupPointerInteractions();
     this.startRenderLoop();
   }
 
@@ -259,45 +279,92 @@ export class GearViewportController {
     this.matingMaterial.emissive.setHex(0x000000);
     this.matingMaterial.emissiveIntensity = 0;
 
-    if (this.activeHighlight === GearHighlightSection.NONE) {
-      return;
+    const applyGlowToSection = (section: GearHighlightSection, glowLevel: number) => {
+      switch (section) {
+        case GearHighlightSection.DIMENSIONS_AND_TYPE: {
+          for (const z of [GearMeshZone.TOOTH_FLANK, GearMeshZone.TEETH_RIM]) {
+            const mat = this.zoneMaterials[z];
+            mat.emissive.setHex(baseStyle.color);
+            mat.emissiveIntensity = Math.max(mat.emissiveIntensity, glowLevel);
+          }
+          break;
+        }
+        case GearHighlightSection.BORE_AND_SHAFT: {
+          const boreMat = this.zoneMaterials[GearMeshZone.BORE];
+          boreMat.emissive.setHex(0xffffff);
+          boreMat.emissiveIntensity = Math.max(boreMat.emissiveIntensity, glowLevel * 1.2);
+          break;
+        }
+        case GearHighlightSection.HUB_AND_WEB: {
+          const hubWebMat = this.zoneMaterials[GearMeshZone.HUB_WEB];
+          hubWebMat.emissive.setHex(baseStyle.color);
+          hubWebMat.emissiveIntensity = Math.max(hubWebMat.emissiveIntensity, glowLevel);
+          break;
+        }
+        case GearHighlightSection.EVOLVENT_AND_PRINT: {
+          const flankMat = this.zoneMaterials[GearMeshZone.TOOTH_FLANK];
+          flankMat.emissive.setHex(baseStyle.color);
+          flankMat.emissiveIntensity = Math.max(flankMat.emissiveIntensity, glowLevel * 1.15);
+          break;
+        }
+        case GearHighlightSection.MATING_SIMULATION: {
+          this.matingMaterial.emissive.setHex(0xf43f5e);
+          this.matingMaterial.emissiveIntensity = Math.max(this.matingMaterial.emissiveIntensity, glowLevel);
+          break;
+        }
+      }
+    };
+
+    if (this.hoverHighlight !== GearHighlightSection.NONE) {
+      applyGlowToSection(this.hoverHighlight, 0.20);
     }
 
-    // Sadece ilgili bölgeye kendi renginde hafif ve yumuşak bir parlama (emissive glow) uygula
-    const subtleGlow = 0.24 * pulseFactor;
+    if (this.activeHighlight !== GearHighlightSection.NONE) {
+      applyGlowToSection(this.activeHighlight, 0.28 * pulseFactor);
+    }
+  }
 
-    switch (this.activeHighlight) {
-      case GearHighlightSection.DIMENSIONS_AND_TYPE: {
-        for (const z of [GearMeshZone.TOOTH_FLANK, GearMeshZone.TEETH_RIM]) {
-          const mat = this.zoneMaterials[z];
-          mat.emissive.setHex(baseStyle.color);
-          mat.emissiveIntensity = subtleGlow;
-        }
-        break;
+  public setHoverHighlight(section: GearHighlightSection): void {
+    if (this.hoverHighlight === section) return;
+    this.hoverHighlight = section;
+    this.applyZoneMaterialStyles();
+  }
+
+  public getZoneFromIntersection(hit: THREE.Intersection): GearMeshZone | null {
+    if (hit.object === this.matingMesh) {
+      return null;
+    }
+    if (hit.faceIndex === undefined || hit.faceIndex === null || !this.lastPrimaryMeshData) {
+      return null;
+    }
+    const faceIndex3 = hit.faceIndex * 3;
+    for (const grp of this.lastPrimaryMeshData.zoneGroups) {
+      if (faceIndex3 >= grp.start && faceIndex3 < grp.start + grp.count) {
+        return grp.zone;
       }
-      case GearHighlightSection.BORE_AND_SHAFT: {
-        const boreMat = this.zoneMaterials[GearMeshZone.BORE];
-        boreMat.emissive.setHex(0xffffff);
-        boreMat.emissiveIntensity = subtleGlow * 1.15;
-        break;
-      }
-      case GearHighlightSection.HUB_AND_WEB: {
-        const hubWebMat = this.zoneMaterials[GearMeshZone.HUB_WEB];
-        hubWebMat.emissive.setHex(baseStyle.color);
-        hubWebMat.emissiveIntensity = subtleGlow;
-        break;
-      }
-      case GearHighlightSection.EVOLVENT_AND_PRINT: {
-        const flankMat = this.zoneMaterials[GearMeshZone.TOOTH_FLANK];
-        flankMat.emissive.setHex(baseStyle.color);
-        flankMat.emissiveIntensity = subtleGlow * 1.1;
-        break;
-      }
-      case GearHighlightSection.MATING_SIMULATION: {
-        this.matingMaterial.emissive.setHex(0xf43f5e);
-        this.matingMaterial.emissiveIntensity = subtleGlow;
-        break;
-      }
+    }
+    return null;
+  }
+
+  public getHighlightSectionFromIntersection(hit: THREE.Intersection): GearHighlightSection {
+    if (hit.object === this.matingMesh) {
+      return GearHighlightSection.MATING_SIMULATION;
+    }
+    const zone = this.getZoneFromIntersection(hit);
+    if (zone === null) {
+      return GearHighlightSection.DIMENSIONS_AND_TYPE;
+    }
+    switch (zone) {
+      case GearMeshZone.TOOTH_FLANK:
+        return GearHighlightSection.EVOLVENT_AND_PRINT;
+      case GearMeshZone.TEETH_RIM:
+        return GearHighlightSection.DIMENSIONS_AND_TYPE;
+      case GearMeshZone.HUB_WEB:
+        return GearHighlightSection.HUB_AND_WEB;
+      case GearMeshZone.BORE:
+        return GearHighlightSection.BORE_AND_SHAFT;
+      default:
+        return GearHighlightSection.DIMENSIONS_AND_TYPE;
     }
   }
 
@@ -569,14 +636,161 @@ export class GearViewportController {
     }
   }
 
+  private setupPointerInteractions(): void {
+    const el = this.renderer.domElement;
+
+    const onPointerDown = (e: PointerEvent) => {
+      this.isPointerDown = true;
+      this.pointerDownPos = { x: e.clientX, y: e.clientY };
+      this.pointerDownTime = performance.now();
+    };
+
+    this.pointerMoveListener = (e: PointerEvent) => {
+      if (this.isPointerDown) {
+        const moveDist = Math.hypot(
+          e.clientX - this.pointerDownPos.x,
+          e.clientY - this.pointerDownPos.y
+        );
+        if (moveDist > 6) {
+          if (this.hoverHighlight !== GearHighlightSection.NONE) {
+            this.setHoverHighlight(GearHighlightSection.NONE);
+            this.onZoneHover?.(null, null, null);
+          }
+        }
+        return;
+      }
+
+      const rect = el.getBoundingClientRect();
+      if (
+        e.clientX < rect.left ||
+        e.clientX > rect.right ||
+        e.clientY < rect.top ||
+        e.clientY > rect.bottom
+      ) {
+        if (this.hoverHighlight !== GearHighlightSection.NONE) {
+          this.setHoverHighlight(GearHighlightSection.NONE);
+          this.onZoneHover?.(null, null, null);
+        }
+        return;
+      }
+
+      const hit = this.raycastPointer(e.clientX, e.clientY);
+      const screenPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+
+      if (hit) {
+        const section = this.getHighlightSectionFromIntersection(hit);
+        el.style.cursor = 'pointer';
+        this.setHoverHighlight(section);
+        this.onZoneHover?.(section, hit.point, screenPos);
+      } else {
+        el.style.cursor = 'default';
+        if (this.hoverHighlight !== GearHighlightSection.NONE) {
+          this.setHoverHighlight(GearHighlightSection.NONE);
+        }
+        this.onZoneHover?.(null, null, null);
+      }
+    };
+
+    this.pointerUpListener = (e: PointerEvent) => {
+      if (!this.isPointerDown) return;
+      const dist = Math.hypot(
+        e.clientX - this.pointerDownPos.x,
+        e.clientY - this.pointerDownPos.y
+      );
+      const elapsed = performance.now() - this.pointerDownTime;
+      this.isPointerDown = false;
+
+      if (dist < 10 && elapsed < 450) {
+        const hit = this.raycastPointer(e.clientX, e.clientY);
+        if (hit) {
+          const section = this.getHighlightSectionFromIntersection(hit);
+          const rect = el.getBoundingClientRect();
+          const screenPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+          this.triggerHitFeedback(hit.point, hit.face?.normal);
+          this.onZoneClick?.(section, hit.point, screenPos);
+        }
+      }
+    };
+
+    const onPointerLeave = () => {
+      this.isPointerDown = false;
+      el.style.cursor = 'default';
+      if (this.hoverHighlight !== GearHighlightSection.NONE) {
+        this.setHoverHighlight(GearHighlightSection.NONE);
+      }
+      this.onZoneHover?.(null, null, null);
+    };
+
+    el.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', this.pointerMoveListener, { passive: true });
+    window.addEventListener('pointerup', this.pointerUpListener);
+    el.addEventListener('pointerleave', onPointerLeave);
+  }
+
+  private raycastPointer(clientX: number, clientY: number): THREE.Intersection | null {
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    this.raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera);
+
+    const candidates: THREE.Object3D[] = [];
+    if (this.primaryMesh) candidates.push(this.primaryMesh);
+    if (this.matingMesh && this.matingGroup.visible) candidates.push(this.matingMesh);
+
+    if (candidates.length === 0) return null;
+    const hits = this.raycaster.intersectObjects(candidates, false);
+    return hits.length > 0 ? hits[0] : null;
+  }
+
+  private triggerHitFeedback(point: THREE.Vector3, normal?: THREE.Vector3): void {
+    const ringGeo = new THREE.RingGeometry(0.3, 1.4, 32);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.95,
+      depthTest: false,
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.position.copy(point);
+    if (normal) {
+      ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+    }
+    this.scene.add(ring);
+
+    const startTime = performance.now();
+    const duration = 380;
+    const animateRipple = (now: number) => {
+      const progress = (now - startTime) / duration;
+      if (progress >= 1) {
+        this.scene.remove(ring);
+        ringGeo.dispose();
+        ringMat.dispose();
+      } else {
+        const scale = 1.0 + progress * 2.8;
+        ring.scale.set(scale, scale, scale);
+        ringMat.opacity = (1 - progress) * 0.95;
+        requestAnimationFrame(animateRipple);
+      }
+    };
+    requestAnimationFrame(animateRipple);
+  }
+
   public captureScreenshot(): string {
     this.renderer.render(this.scene, this.camera);
     return this.renderer.domElement.toDataURL('image/png');
   }
 
   public dispose(): void {
-    if (this.animationFrameId !== null) {
+    if (this.animationFrameId !== 0) {
       cancelAnimationFrame(this.animationFrameId);
+    }
+    if (this.pointerMoveListener) {
+      window.removeEventListener('pointermove', this.pointerMoveListener);
+    }
+    if (this.pointerUpListener) {
+      window.removeEventListener('pointerup', this.pointerUpListener);
     }
     this.resizeObserver?.disconnect();
     this.clearGroupGeometry(this.primaryGroup);

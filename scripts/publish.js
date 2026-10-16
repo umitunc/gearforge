@@ -134,12 +134,28 @@ if (fs.existsSync(PUBLIC_HTML) && fs.existsSync(distDir)) {
 }
 
 // 9. Git commit & push
-log('Git commit ve push yapılıyor...');
+log('Git commit, tag ve push yapılıyor...');
 try {
-  execSync(`git add package.json index.html public/sw.js public/llms-full.txt`, { cwd: REPO_ROOT, stdio: 'inherit' });
-  execSync(`git commit -m "chore(release): publish v${nextVersion} [build ${buildId}]"`, { cwd: REPO_ROOT, stdio: 'inherit' });
-  execSync(`git push origin main`, { cwd: REPO_ROOT, stdio: 'inherit' });
-  log(`Git commit & push başarılı! (v${nextVersion})`);
+  const customMessage = process.argv.slice(2).join(' ').trim();
+  const commitMsg = customMessage
+    ? `chore(release): v${nextVersion} - ${customMessage} [build ${buildId}]`
+    : `chore(release): publish v${nextVersion} [build ${buildId}]`;
+
+  // Tüm değişiklikleri ve yeni dosyaları sahneye ekle
+  execSync(`git add -A`, { cwd: REPO_ROOT, stdio: 'inherit' });
+  execSync(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`, { cwd: REPO_ROOT, stdio: 'inherit' });
+
+  // Resmi sürüm etiketi oluştur (Git Tag)
+  try {
+    execSync(`git tag -a "v${nextVersion}" -m "GearForge Release v${nextVersion}: ${customMessage || 'Otomatik üretim sürümü'}"`, { cwd: REPO_ROOT, stdio: 'inherit' });
+    log(`Git tag oluşturuldu: v${nextVersion}`);
+  } catch (tagErr) {
+    log(`Uyarı: Git tag oluşturulamadı (${tagErr.message}), push işlemine devam ediliyor.`);
+  }
+
+  // GitHub origin main dalına ve etiketlere pushla
+  execSync(`git push origin main --tags`, { cwd: REPO_ROOT, stdio: 'inherit' });
+  log(`Git commit & push origin main --tags başarılı! (v${nextVersion})`);
 } catch (err) {
   error(`Git push sırasında hata: ${err.message}`);
 }
