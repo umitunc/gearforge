@@ -3,7 +3,7 @@
 Platform: GearForge 3D
 URL: https://gear.truncgil.com
 Developer: Trunçgil Teknoloji (https://www.truncgil.com.tr)
-Release Version: v1.0.6-cad (Stable)
+Release Version: v1.0.7-cad (Stable)
 Target Standard: ISO 21771 Involute Cylindrical Gears & DIN 6885 Shaft Hub Connections
 
 ---

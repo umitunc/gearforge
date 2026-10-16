@@ -185,10 +185,10 @@ body {
   50% { opacity: 1; transform: scale(1.25); box-shadow: 0 0 12px #fbbf24; }
 }
 
-/* Ana Çalışma Alanı (3 Sütunlu CAD Düzeni) */
+/* Ana Çalışma Alanı (Sol panel kaldırılarak 3B Sahneye tam alan kazandırıldı) */
 .app-workspace {
   display: grid;
-  grid-template-columns: 360px minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   grid-template-rows: minmax(0, 1fr);
   flex: 1;
   min-height: 0;
@@ -196,7 +196,10 @@ body {
   overflow: hidden;
 }
 
-.sidebar-left,
+.sidebar-left {
+  display: none !important;
+}
+
 .sidebar-right {
   background-color: var(--bg-panel);
   height: 100%;
@@ -1115,6 +1118,7 @@ body {
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -1270,6 +1274,7 @@ body {
   letter-spacing: -0.025em;
   background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 60%, #94a3b8 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -3479,22 +3484,28 @@ body {
 
 .viewport-dimension-hud {
   position: absolute;
-  top: 60px;
+  top: 54px;
   left: 16px;
-  width: 310px;
-  max-width: calc(100% - 32px);
+  width: 380px;
+  max-width: min(420px, calc(100vw - 32px));
+  max-height: calc(100vh - 120px);
   pointer-events: auto;
-  background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(13, 20, 36, 0.92);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 16px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 1px rgba(255, 255, 255, 0.25);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.72), 0 0 1px rgba(255, 255, 255, 0.3);
   padding: 14px 16px;
   color: #f8fafc;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: width 0.25s ease, max-height 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   user-select: none;
   -webkit-user-select: none;
+  z-index: 20;
 }
 
 .viewport-dimension-hud.dim-hl-dimensions {
@@ -3564,6 +3575,14 @@ body {
   color: #38bdf8;
 }
 
+.hud-expanded-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .hud-header {
   display: flex;
   align-items: center;
@@ -3571,6 +3590,7 @@ body {
   margin-bottom: 10px;
   padding-bottom: 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
 .hud-header-left {
@@ -3631,7 +3651,8 @@ body {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
 .hud-metric-cell {
@@ -3656,13 +3677,13 @@ body {
 
 .hud-m-value strong {
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   color: #f8fafc;
 }
 
 .hud-m-value small {
-  font-size: 10px;
+  font-size: 9.5px;
   color: #94a3b8;
   margin-left: 2px;
 }
@@ -3670,7 +3691,10 @@ body {
 .hud-footer {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .hud-edit-section-btn {
@@ -3678,33 +3702,193 @@ body {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 30px;
+  height: 32px;
   padding: 0 12px;
   border-radius: 8px;
   border: 1px solid rgba(56, 189, 248, 0.45);
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.22) 0%, rgba(2, 132, 199, 0.15) 100%);
   color: #38bdf8;
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
 
 .hud-edit-section-btn:hover {
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.38) 0%, rgba(2, 132, 199, 0.28) 100%);
-  border-color: rgba(56, 189, 248, 0.7);
+  border-color: rgba(56, 189, 248, 0.75);
   color: #ffffff;
   transform: translateY(-1px);
 }
 
-.hud-arrow {
+.hud-edit-section-btn.active {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(185, 28, 28, 0.15) 100%);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #fca5a5;
+}
+
+.hud-edit-section-btn.active:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.32) 0%, rgba(185, 28, 28, 0.25) 100%);
+  border-color: rgba(239, 68, 68, 0.85);
+  color: #ffffff;
+}
+
+.hud-collapse-chevron {
   font-size: 13px;
+  line-height: 1;
+}
+
+.hud-editor-collapse {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.hud-editor-collapse.open {
+  display: flex;
+  animation: hudCollapseFadeIn 0.22s ease-out forwards;
+}
+
+@keyframes hudCollapseFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hud-editor-scroll-area {
+  flex: 1;
+  min-height: 0;
+  max-height: min(420px, calc(100vh - 290px));
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding-right: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.hud-editor-scroll-area::-webkit-scrollbar {
+  width: 5px;
+}
+
+.hud-editor-scroll-area::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+}
+
+.hud-editor-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.45);
+  border-radius: 4px;
+}
+
+.hud-editor-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.75);
+}
+
+/* Kart içerisindeki kontrol elemanlarının kompakt, şık CAD dizilimi */
+.hud-editor-scroll-area .param-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 2px 0;
+}
+
+.hud-editor-scroll-area .control-field {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 6px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.hud-editor-scroll-area .control-field:hover {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.hud-editor-scroll-area .control-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hud-editor-scroll-area .control-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.hud-editor-scroll-area .control-num-input {
+  width: 62px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #38bdf8;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: right;
+  padding: 0 5px;
+}
+
+.hud-editor-scroll-area .control-select {
+  height: 29px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #f1f5f9;
+  font-size: 11.5px;
+  padding: 0 8px;
+}
+
+.hud-editor-scroll-area .preset-bar {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 8px;
+  padding: 7px 9px;
+  margin-bottom: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hud-editor-scroll-area .preset-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #fbbf24;
+  letter-spacing: -0.01em;
+}
+
+.hud-editor-scroll-area .preset-select {
+  height: 29px;
+  font-size: 11.5px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fef08a;
+  border-radius: 6px;
+  padding: 0 8px;
+}
+
+.hud-editor-scroll-area .preset-desc {
+  font-size: 9.5px;
+  color: #cbd5e1;
+  line-height: 1.35;
+  margin: 0;
 }
 
 .hud-interactive-tip {
   font-size: 9.5px;
   color: #64748b;
   text-align: center;
+  flex-shrink: 0;
 }
 
 /* ==========================================================================

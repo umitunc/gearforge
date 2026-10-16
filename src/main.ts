@@ -100,17 +100,20 @@ function bootstrapGearBuilderApp(): void {
   // 6. UI Görünüm Bileşenlerini bağla
   const parameterControlsView = new ParameterControlsView(leftPanel, store);
 
-  // 7. 3B Sahne Üzeri Canlı Ölçü Göstergesi (CAD Dimension HUD)
+  // 7. 3B Sahne Üzeri Canlı Ölçü Göstergesi (CAD Dimension HUD & Akordeon Ayar Paneli)
   const dimensionOverlay = dimensionContainer
-    ? new ViewportDimensionOverlay(dimensionContainer, store, (section) => {
-        store.setActiveHighlightSection(section);
-        swipeBar?.setActive(section, true);
-        if (window.innerWidth <= 960) {
-          mobileDrawer?.openToSection(section);
-        } else {
-          parameterControlsView.openSection(section, true);
+    ? new ViewportDimensionOverlay(
+        dimensionContainer,
+        store,
+        parameterControlsView,
+        (section) => {
+          store.setActiveHighlightSection(section);
+          swipeBar?.setActive(section, true);
+          if (window.innerWidth <= 960) {
+            mobileDrawer?.openToSection(section);
+          }
         }
-      })
+      )
     : null;
 
   // 8. Viewport Overlay Araç Çubuğu (Toolbar)
@@ -133,11 +136,10 @@ function bootstrapGearBuilderApp(): void {
         } else {
           const section = catId as GearHighlightSection;
           store.setActiveHighlightSection(section);
-          dimensionOverlay?.setActiveSection(section);
           if (window.innerWidth <= 960) {
             mobileDrawer?.openToSection(section);
           } else {
-            parameterControlsView.openSection(section, true);
+            dimensionOverlay?.openEditorForSection(section);
           }
         }
       })
@@ -164,13 +166,12 @@ function bootstrapGearBuilderApp(): void {
   // "dişlinin hangi bölgesine tıklarsak o bölgesinde işlem yapılacak section direkt ekranda açılabilir"
   viewportController.onZoneClick = (section) => {
     store.setActiveHighlightSection(section);
-    dimensionOverlay?.setActiveSection(section);
     swipeBar?.setActive(section, true);
 
     if (window.innerWidth <= 960) {
       mobileDrawer?.openToSection(section);
     } else {
-      parameterControlsView.openSection(section, true);
+      dimensionOverlay?.openEditorForSection(section);
     }
   };
 

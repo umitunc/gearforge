@@ -30,6 +30,8 @@ export class ParameterControlsView {
   private readonly store: GearBuilderStore;
   private readonly fieldUpdaters = new Map<string, (state: GearBuilderState) => void>();
   private readonly sectionElements = new Map<GearHighlightSection, HTMLElement>();
+  private readonly sectionBodies = new Map<GearHighlightSection, HTMLElement>();
+  private presetSectionEl!: HTMLElement;
   private isAccordionMode = true;
 
   constructor(container: HTMLElement, store: GearBuilderStore) {
@@ -41,6 +43,29 @@ export class ParameterControlsView {
 
   public getSectionElement(section: GearHighlightSection): HTMLElement | undefined {
     return this.sectionElements.get(section);
+  }
+
+  public getPresetSectionElement(): HTMLElement {
+    return this.presetSectionEl;
+  }
+
+  public getSectionBodyElement(section: GearHighlightSection): HTMLElement | undefined {
+    return this.sectionBodies.get(section);
+  }
+
+  /**
+   * Belirtilen bölümün parametre kontrollerini (ve 1. bölüm için hazır şablonları)
+   * verilen hedef DOM konteynerine (HUD kartı veya mobil çekmece) tek kalemde yerleştirir.
+   */
+  public mountSectionContent(section: GearHighlightSection, targetEl: HTMLElement): void {
+    targetEl.innerHTML = '';
+    if (section === GearHighlightSection.DIMENSIONS_AND_TYPE && this.presetSectionEl) {
+      targetEl.appendChild(this.presetSectionEl);
+    }
+    const body = this.sectionBodies.get(section);
+    if (body) {
+      targetEl.appendChild(body);
+    }
   }
 
   public setAccordionMode(enabled: boolean): void {
@@ -663,6 +688,7 @@ export class ParameterControlsView {
     wrapper.appendChild(label);
     wrapper.appendChild(select);
     wrapper.appendChild(descBox);
+    this.presetSectionEl = wrapper;
     return wrapper;
   }
 
@@ -698,6 +724,7 @@ export class ParameterControlsView {
     const body = document.createElement('div');
     body.className = 'param-section-body';
     populate(body);
+    this.sectionBodies.set(highlightSection, body);
 
     const activateHighlight = () => {
       this.store.setActiveHighlightSection(highlightSection);
