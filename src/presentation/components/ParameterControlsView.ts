@@ -21,6 +21,48 @@ interface SliderFieldConfig {
   readonly isVisible?: (params: GearParameters) => boolean;
 }
 
+const OPTION_METADATA: Record<string, { icon: string; shortLabel: string; subtitle: string }> = {
+  // 1. Dişli Tipleri
+  [GearType.SPUR]: { icon: '⚙️', shortLabel: 'Düz Dişli', subtitle: 'Spur Gear' },
+  [GearType.HELICAL]: { icon: '🌀', shortLabel: 'Helisel Dişli', subtitle: 'Açılı & Sessiz' },
+  [GearType.HERRINGBONE]: { icon: '⚡', shortLabel: 'Çavuş Dişli', subtitle: 'Çift Helis (V)' },
+  [GearType.BEVEL_TAPER]: { icon: '📐', shortLabel: 'Konik Eğimli', subtitle: 'Daralan Profil' },
+  [GearType.INTERNAL_RING]: { icon: '⭕', shortLabel: 'İç Dişli', subtitle: 'Halka Çember' },
+
+  // 2. Boyutlandırma Modları
+  [SizingMode.MODULE]: { icon: '📏', shortLabel: 'Modül (m)', subtitle: 'm + z ➔ Çap' },
+  [SizingMode.PITCH_DIAMETER]: { icon: '⭕', shortLabel: 'Bölüm Çapı', subtitle: 'Hedef d ➔ m' },
+  [SizingMode.OUTER_DIAMETER]: { icon: '🎯', shortLabel: 'Dış Çap (da)', subtitle: 'da + z ➔ m' },
+
+  // 3. Merkez Delik & Mil Tipleri
+  [BoreType.CIRCULAR]: { icon: '⭕', shortLabel: 'Yuvarlak Mil', subtitle: 'Standart Daire' },
+  [BoreType.KEYWAY]: { icon: '🗝️', shortLabel: 'DIN 6885 Kama', subtitle: 'Kamalı Mil' },
+  [BoreType.D_SHAFT]: { icon: '🔲', shortLabel: 'Tek D-Mil', subtitle: 'NEMA 17 D-Şaft' },
+  [BoreType.DOUBLE_D]: { icon: '⏸️', shortLabel: 'Çift D-Mil', subtitle: 'Çift Düzlem' },
+  [BoreType.HEXAGONAL]: { icon: '⬡', shortLabel: 'Altıgen Mil', subtitle: 'Hex / Allen' },
+  [BoreType.SQUARE]: { icon: '⏹️', shortLabel: 'Kare Mil', subtitle: 'Kare Şaft' },
+  [BoreType.SPLINE]: { icon: '✳️', shortLabel: 'Frezeli Spline', subtitle: 'Yıldız Şaft' },
+  [BoreType.NONE]: { icon: '⚪', shortLabel: 'Deliksiz', subtitle: 'Tam Dolu Masif' },
+
+  // 4. Helis Yönü
+  [HelixHandedness.RIGHT]: { icon: '↗️', shortLabel: 'Sağ El', subtitle: 'Right-Hand (RH)' },
+  [HelixHandedness.LEFT]: { icon: '↖️', shortLabel: 'Sol El', subtitle: 'Left-Hand (LH)' },
+
+  // 5. Gövde Tasarımı (Web Styles)
+  [WebStyle.SOLID]: { icon: '🔘', shortLabel: 'Masif Gövde', subtitle: 'Düz Masif Disc' },
+  [WebStyle.RECESSED]: { icon: '🛞', shortLabel: 'Kademeli Web', subtitle: 'Çökertmeli İnce' },
+  [WebStyle.LIGHTENING_HOLES]: { icon: '🕳️', shortLabel: 'Delikli Web', subtitle: 'Dairesel Hafif' },
+  [WebStyle.SPOKED]: { icon: '☸️', shortLabel: 'Kollu Jant', subtitle: 'İspitli Kollar' },
+
+  // 6. Filament Materyalleri
+  [FilamentMaterial.PLA]: { icon: '🌿', shortLabel: 'PLA / PLA+', subtitle: 'Standart & Hassas' },
+  [FilamentMaterial.PETG]: { icon: '💎', shortLabel: 'PETG', subtitle: 'Darbe & Isı Direnci' },
+  [FilamentMaterial.ABS]: { icon: '🛡️', shortLabel: 'ABS', subtitle: 'Yüksek Tork' },
+  [FilamentMaterial.ASA]: { icon: '☀️', shortLabel: 'ASA', subtitle: 'Dış Ortam & UV' },
+  [FilamentMaterial.NYLON_PA12]: { icon: '⚙️', shortLabel: 'Naylon PA12', subtitle: 'Aşınma Direnci' },
+  [FilamentMaterial.TPU]: { icon: '👟', shortLabel: 'TPU / Esnek', subtitle: 'Titreşim Emici' },
+};
+
 /**
  * Sol paneldeki tüm parametrik dişli kontrollerini modüler, kaydırılabilir (scrollable)
  * ve 3B bölge vurgulamalı (section-highlight) olarak yöneten görünüm sınıfı (SRP / OCP).
@@ -645,49 +687,101 @@ export class ParameterControlsView {
 
   private buildPresetSection(): HTMLElement {
     const wrapper = document.createElement('div');
-    wrapper.className = 'preset-bar';
+    wrapper.className = 'preset-bar card-select-container';
+
+    const header = document.createElement('div');
+    header.className = 'card-select-header';
 
     const label = document.createElement('label');
     label.className = 'preset-label';
     label.textContent = 'Hazır Mühendislik Şablonları (Presets)';
 
-    const select = document.createElement('select');
-    select.className = 'control-select preset-select';
+    const activeBadge = document.createElement('span');
+    activeBadge.className = 'active-badge-pill';
+    activeBadge.textContent = 'Özel Tasarım';
 
-    const customOpt = document.createElement('option');
-    customOpt.value = '';
-    customOpt.textContent = '✨ Özel Parametrik Tasarım (Custom)';
-    select.appendChild(customOpt);
+    header.append(label, activeBadge);
 
+    const track = document.createElement('div');
+    track.className = 'card-select-track preset-card-track';
+    track.setAttribute('role', 'radiogroup');
+    track.setAttribute('aria-label', 'Hazır Mühendislik Şablonları');
+
+    const presetCards = new Map<string, HTMLButtonElement>();
+
+    // 1. Özel Parametrik Tasarım (Custom) Card
+    const customCard = document.createElement('button');
+    customCard.type = 'button';
+    customCard.className = 'card-select-item active';
+    customCard.dataset.value = '';
+    customCard.setAttribute('role', 'radio');
+    customCard.setAttribute('aria-label', 'Özel Parametrik Tasarım');
+    customCard.innerHTML = `
+      <span class="card-check">✓</span>
+      <span class="card-icon">✨</span>
+      <span class="card-title">Özel Tasarım</span>
+      <span class="card-subtitle">Manuel CAD</span>
+    `;
+    customCard.addEventListener('click', () => {
+      this.store.applyPreset('');
+    });
+    track.appendChild(customCard);
+    presetCards.set('', customCard);
+
+    // 2. Preset Cards
     for (const preset of this.store.getPresets()) {
-      const opt = document.createElement('option');
-      opt.value = preset.id;
-      opt.textContent = `[${preset.category}] ${preset.name}`;
-      select.appendChild(opt);
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'card-select-item';
+      card.dataset.value = preset.id;
+      card.setAttribute('role', 'radio');
+      card.setAttribute('aria-label', preset.name);
+
+      let catIcon = '⚙️';
+      if (preset.category.includes('Step') || preset.category.includes('Motor')) catIcon = '⚡';
+      else if (preset.category.includes('Robot') || preset.category.includes('Servo')) catIcon = '🤖';
+      else if (preset.category.includes('Endüstri')) catIcon = '🏭';
+      else if (preset.category.includes('Helis') || preset.category.includes('Sessiz')) catIcon = '🌀';
+      else if (preset.category.includes('Planet') || preset.category.includes('İç')) catIcon = '🪐';
+
+      card.innerHTML = `
+        <span class="card-check">✓</span>
+        <span class="card-icon">${catIcon}</span>
+        <span class="card-title">${preset.name}</span>
+        <span class="card-subtitle">[${preset.category}]</span>
+      `;
+
+      card.addEventListener('click', () => {
+        this.store.applyPreset(preset.id);
+      });
+
+      track.appendChild(card);
+      presetCards.set(preset.id, card);
     }
 
     const descBox = document.createElement('p');
     descBox.className = 'preset-desc';
 
-    select.addEventListener('change', () => {
-      if (select.value) {
-        this.store.applyPreset(select.value);
-      }
-    });
-
     this.fieldUpdaters.set('__preset__', (state) => {
-      select.value = state.activePresetId ?? '';
-      const activePreset = state.activePresetId
-        ? this.store.getPresets().find((p) => p.id === state.activePresetId)
+      const activeId = state.activePresetId ?? '';
+      for (const [id, btn] of presetCards) {
+        const isMatch = id === activeId;
+        btn.classList.toggle('active', isMatch);
+        btn.setAttribute('aria-checked', isMatch ? 'true' : 'false');
+        if (isMatch) {
+          btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      }
+      const activePreset = activeId
+        ? this.store.getPresets().find((p) => p.id === activeId)
         : undefined;
+      activeBadge.textContent = activePreset ? activePreset.name : 'Özel Tasarım';
       descBox.textContent = activePreset
         ? activePreset.description
         : 'Parametreler manuel olarak özelleştirildi. İstediğiniz varyasyonu kaydedebilir veya STL olarak indirebilirsiniz.';
     });
 
-    wrapper.appendChild(label);
-    wrapper.appendChild(select);
-    wrapper.appendChild(descBox);
+    wrapper.append(header, track, descBox);
     this.presetSectionEl = wrapper;
     return wrapper;
   }
@@ -834,37 +928,79 @@ export class ParameterControlsView {
     options: readonly { value: string; label: string }[],
     isVisible?: (params: GearParameters) => boolean
   ): void {
-    const row = document.createElement('div');
-    row.className = 'control-row';
+    const container = document.createElement('div');
+    container.className = 'card-select-container';
 
-    const label = document.createElement('label');
+    const header = document.createElement('div');
+    header.className = 'card-select-header';
+
+    const label = document.createElement('span');
     label.className = 'control-label';
     label.textContent = labelText;
 
-    const select = document.createElement('select');
-    select.className = 'control-select';
+    const activeBadge = document.createElement('span');
+    activeBadge.className = 'active-badge-pill';
+
+    header.append(label, activeBadge);
+
+    const track = document.createElement('div');
+    track.className = 'card-select-track';
+    track.setAttribute('role', 'radiogroup');
+    track.setAttribute('aria-label', labelText);
+
+    const itemElements = new Map<string, HTMLButtonElement>();
 
     for (const opt of options) {
-      const el = document.createElement('option');
-      el.value = opt.value;
-      el.textContent = opt.label;
-      select.appendChild(el);
+      const meta = OPTION_METADATA[opt.value] || {
+        icon: '⚙️',
+        shortLabel: opt.label,
+        subtitle: '',
+      };
+
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'card-select-item';
+      card.dataset.value = opt.value;
+      card.setAttribute('role', 'radio');
+      card.setAttribute('aria-label', opt.label);
+
+      card.innerHTML = `
+        <span class="card-check">✓</span>
+        <span class="card-icon">${meta.icon}</span>
+        <span class="card-title">${meta.shortLabel}</span>
+        ${meta.subtitle ? `<span class="card-subtitle">${meta.subtitle}</span>` : ''}
+      `;
+
+      card.addEventListener('click', () => {
+        this.store.updateParameters({
+          [key]: opt.value as unknown as GearParameters[K],
+        } as Partial<GearParameters>);
+      });
+
+      track.appendChild(card);
+      itemElements.set(opt.value, card);
     }
 
-    select.addEventListener('change', () => {
-      this.store.updateParameters({
-        [key]: select.value as unknown as GearParameters[K],
-      } as Partial<GearParameters>);
-    });
-
-    row.appendChild(label);
-    row.appendChild(select);
-    parent.appendChild(row);
+    container.append(header, track);
+    parent.appendChild(container);
 
     this.fieldUpdaters.set(String(key), (state) => {
-      select.value = String(state.parameters[key]);
+      const currentVal = String(state.parameters[key]);
+      for (const [val, card] of itemElements) {
+        const isActive = val === currentVal;
+        card.classList.toggle('active', isActive);
+        card.setAttribute('aria-checked', isActive ? 'true' : 'false');
+        if (isActive) {
+          card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      }
+
+      const activeMeta = OPTION_METADATA[currentVal];
+      const matchedOpt = options.find((o) => o.value === currentVal);
+      activeBadge.textContent = activeMeta?.shortLabel || matchedOpt?.label || currentVal;
+
       const visible = isVisible ? isVisible(state.parameters) : true;
-      row.style.display = visible ? 'flex' : 'none';
+      container.style.display = visible ? 'flex' : 'none';
     });
   }
 
