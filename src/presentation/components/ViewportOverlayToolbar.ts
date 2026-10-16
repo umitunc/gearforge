@@ -1,62 +1,25 @@
 import { GearBuilderStore } from '../../application/GearBuilderStore';
-import { GearHighlightSection } from '../../domain/models/GearTypes';
 import { GearViewportController } from '../../infrastructure/three/GearViewportController';
 
-const HIGHLIGHT_LABELS: Record<
-  GearHighlightSection,
-  { title: string; colorClass: string }
-> = {
-  [GearHighlightSection.NONE]: {
-    title: 'Tam Görünüm (Vurgu Yok)',
-    colorClass: 'hl-none',
-  },
-  [GearHighlightSection.DIMENSIONS_AND_TYPE]: {
-    title: '1. Dişli Çemberi & Dış Rim (Mavi)',
-    colorClass: 'hl-dimensions',
-  },
-  [GearHighlightSection.BORE_AND_SHAFT]: {
-    title: '2. Merkez Delik & Mil Yuvası (Yeşil)',
-    colorClass: 'hl-bore',
-  },
-  [GearHighlightSection.HUB_AND_WEB]: {
-    title: '3. Göbek (Hub), Web & Hafifletme (Turuncu)',
-    colorClass: 'hl-hub',
-  },
-  [GearHighlightSection.EVOLVENT_AND_PRINT]: {
-    title: '4. Evolvent Diş Yanakları (Mor)',
-    colorClass: 'hl-evolvent',
-  },
-  [GearHighlightSection.MATING_SIMULATION]: {
-    title: '5. Eşleşen Pinyon & Temas Bölgesi (Kırmızı)',
-    colorClass: 'hl-mating',
-  },
-};
-
 /**
- * 3B Sahne üzerindeki kamera açıları, aktif vurgulanan bölge göstergesi (Zone HUD),
- * kesit görünümü, tel kafes ve referans çemberleri araç çubuğunu yöneten bileşen (SRP).
+ * 3B Sahne üzerindeki kamera açıları, kesit görünümü, tel kafes,
+ * 3D tabla ve referans çemberleri araç çubuğunu yöneten bileşen (SRP).
  */
 export class ViewportOverlayToolbar {
   private readonly container: HTMLElement;
   private readonly viewport: GearViewportController;
-  private readonly store: GearBuilderStore;
   private readonly onToggleDimensionOverlay?: (active: boolean) => void;
-  private highlightBannerEl!: HTMLElement;
 
   constructor(
     container: HTMLElement,
     viewport: GearViewportController,
-    store: GearBuilderStore,
+    _store: GearBuilderStore,
     onToggleDimensionOverlay?: (active: boolean) => void
   ) {
     this.container = container;
     this.viewport = viewport;
-    this.store = store;
     this.onToggleDimensionOverlay = onToggleDimensionOverlay;
     this.render();
-    this.store.subscribe((state) => {
-      this.updateHighlightBanner(state.activeHighlightSection);
-    });
   }
 
   private render(): void {
@@ -73,7 +36,7 @@ export class ViewportOverlayToolbar {
       this.createActionPill('Ön Görünüm', () => this.viewport.setCameraPreset('front'))
     );
 
-    // Görünüm Modu Anahtarları
+    // Görsel Katman ve Simülasyon Kontrolleri
     const toggleGroup = document.createElement('div');
     toggleGroup.className = 'toolbar-group';
 
@@ -86,7 +49,7 @@ export class ViewportOverlayToolbar {
     );
 
     const playPill = this.createTogglePill(
-      '⟳ Dönüş Simülasyonu',
+      '🔄 Dönüş Simülasyonu',
       opts.isAnimationPlaying,
       (active) => this.viewport.setDisplayOptions({ isAnimationPlaying: active })
     );
@@ -118,10 +81,6 @@ export class ViewportOverlayToolbar {
     toggleGroup.append(dimPill, playPill, pitchPill, sectionPill, wirePill, gridPill);
     toolbar.append(camGroup, toggleGroup);
 
-    // Aktif Vurgulanan Bölge (Highlight Zone) HUD Çubuğu
-    this.highlightBannerEl = document.createElement('div');
-    this.highlightBannerEl.className = 'viewport-highlight-hud';
-
     // Sol alt mühendislik çemberleri açıklaması (Legend)
     const legend = document.createElement('div');
     legend.className = 'viewport-legend';
@@ -133,32 +92,7 @@ export class ViewportOverlayToolbar {
       <span class="legend-hint">Sol Tık: Döndür • Sağ Tık: Kaydır • Tekerlek: Yakınlaştır</span>
     `;
 
-    this.container.append(toolbar, this.highlightBannerEl, legend);
-  }
-
-  private updateHighlightBanner(section: GearHighlightSection): void {
-    if (section === GearHighlightSection.NONE) {
-      this.highlightBannerEl.style.display = 'none';
-      return;
-    }
-
-    const info = HIGHLIGHT_LABELS[section];
-    this.highlightBannerEl.style.display = 'flex';
-    this.highlightBannerEl.className = `viewport-highlight-hud ${info.colorClass}`;
-    this.highlightBannerEl.innerHTML = `
-      <span class="hud-indicator-dot"></span>
-      <span class="hud-text">Vurgulanan Bölge: <strong>${info.title}</strong></span>
-    `;
-
-    const clearBtn = document.createElement('button');
-    clearBtn.type = 'button';
-    clearBtn.className = 'hud-clear-btn';
-    clearBtn.textContent = '✕ Vurguyu Kapat';
-    clearBtn.addEventListener('click', () => {
-      this.store.setActiveHighlightSection(GearHighlightSection.NONE);
-    });
-
-    this.highlightBannerEl.appendChild(clearBtn);
+    this.container.append(toolbar, legend);
   }
 
   private createActionPill(label: string, onClick: () => void): HTMLButtonElement {
