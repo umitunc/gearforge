@@ -1,7 +1,9 @@
 import { GearBuilderState, GearBuilderStore } from '../../application/GearBuilderStore';
+import { i18n, SUPPORTED_LANGUAGES } from '../../application/I18nService';
 import { ExportFormat } from '../../domain/models/GearTypes';
 import { GearViewportController } from '../../infrastructure/three/GearViewportController';
 import { EngineeringGuideModal } from './EngineeringGuideModal';
+import { GearCreationWizardModal } from './GearCreationWizardModal';
 import { ProjectManagerModal } from './ProjectManagerModal';
 import { SaveProjectModal } from './SaveProjectModal';
 import { ToastNotification } from './ToastNotification';
@@ -13,6 +15,7 @@ export class AppMenuBar {
   private readonly projectManagerModal: ProjectManagerModal;
   private readonly saveModal: SaveProjectModal;
   private readonly guideModal: EngineeringGuideModal;
+  private readonly wizardModal: GearCreationWizardModal;
 
   private activeDropdown: HTMLElement | null = null;
   private activeProjectBadgeEl!: HTMLElement;
@@ -23,7 +26,8 @@ export class AppMenuBar {
     store: GearBuilderStore,
     viewport: GearViewportController,
     projectManagerModal: ProjectManagerModal,
-    saveModal: SaveProjectModal
+    saveModal: SaveProjectModal,
+    wizardModal: GearCreationWizardModal
   ) {
     this.container = container;
     this.store = store;
@@ -31,12 +35,17 @@ export class AppMenuBar {
     this.projectManagerModal = projectManagerModal;
     this.saveModal = saveModal;
     this.guideModal = new EngineeringGuideModal();
+    this.wizardModal = wizardModal;
 
     this.render();
     this.setupGlobalShortcuts();
     this.setupDropdownBehavior();
 
     this.store.subscribe((state) => this.updateStateBadges(state));
+    i18n.onLanguageChange(() => {
+      this.render();
+      this.updateStateBadges(this.store.getState());
+    });
   }
 
   private render(): void {
@@ -47,45 +56,52 @@ export class AppMenuBar {
     menuLeft.className = 'menubar-left';
 
     // 1. Dosya (File) Menüsü
-    const fileMenu = this.createDropdownMenu('📁 Dosya', [
+    const fileMenu = this.createDropdownMenu(i18n.t('menu.file'), [
+      {
+        icon: '🧙‍♂️',
+        label: i18n.t('menu.wizard'),
+        shortcut: 'Ctrl+W',
+        highlight: true,
+        action: () => this.wizardModal.open(true),
+      },
       {
         icon: '📄',
-        label: 'Yeni Dişli Tasarımı',
+        label: i18n.t('menu.new_gear'),
         shortcut: 'Ctrl+N',
         action: () => this.handleNewGear(),
       },
       {
         icon: '📂',
-        label: 'Kayıtlı Projelerden Aç (LocalStorage)...',
+        label: i18n.t('menu.open_saved'),
         shortcut: 'Ctrl+O',
         action: () => this.projectManagerModal.open(),
       },
       {
         icon: '💾',
-        label: 'Projeyi Kaydet',
+        label: i18n.t('menu.save'),
         shortcut: 'Ctrl+S',
         action: () => this.handleQuickSave(),
       },
       {
         icon: '📑',
-        label: 'Farklı Kaydet (LocalStorage)...',
+        label: i18n.t('menu.save_as'),
         action: () => this.saveModal.open(true),
       },
       { divider: true },
       {
         icon: '📥',
-        label: 'JSON Ayar Dosyası Yükle...',
+        label: i18n.t('menu.import_json'),
         action: () => this.triggerJsonUpload(),
       },
       {
         icon: '📤',
-        label: 'Ayarları JSON Olarak İndir',
+        label: i18n.t('menu.export_json'),
         action: () => this.store.exportPrimaryGear(ExportFormat.JSON_CONFIG),
       },
       { divider: true },
       {
         icon: '🔄',
-        label: 'Varsayılan Ayarlara Sıfırla',
+        label: i18n.t('menu.reset_default'),
         action: () => this.handleResetDefault(),
       },
     ]);
@@ -190,46 +206,54 @@ export class AppMenuBar {
     const menuRight = document.createElement('div');
     menuRight.className = 'menubar-right';
 
-    // Aktif Proje Göstergesi
+    // Aktif Proje Göstergesi (Tıklayınca sihirbazı veya proje adını açar)
     const projectInfo = document.createElement('div');
     projectInfo.className = 'menubar-project-info';
-    projectInfo.title = 'Şu anki açık olan dişli tasarımı';
+    projectInfo.title = 'Şu anki açık olan dişli tasarımı (Sihirbaz ile düzenlemek için tıklayın)';
+    projectInfo.style.cursor = 'pointer';
 
     this.activeProjectBadgeEl = document.createElement('span');
     this.activeProjectBadgeEl.className = 'project-name-badge';
-    this.activeProjectBadgeEl.textContent = 'Yeni Dişli Tasarımı';
+    this.activeProjectBadgeEl.textContent = this.store.getState().currentProjectName || i18n.t('badge.active_project');
 
     this.isDirtyBadgeEl = document.createElement('span');
     this.isDirtyBadgeEl.className = 'project-dirty-badge hidden';
-    this.isDirtyBadgeEl.textContent = '● Değiştirildi';
+    this.isDirtyBadgeEl.textContent = i18n.t('badge.dirty');
     this.isDirtyBadgeEl.title = 'Kaydedilmemiş değişiklikler var';
 
     projectInfo.append(this.activeProjectBadgeEl, this.isDirtyBadgeEl);
+    projectInfo.addEventListener('click', () => {
+      this.wizardModal.open(false);
+    });
 
     // Hızlı Aksiyon Butonları
     const quickActions = document.createElement('div');
     quickActions.className = 'menubar-quick-actions';
 
-    const btnNew = this.createQuickBtn('➕ Yeni', 'Yeni bir dişli tasarımı başlat', () =>
+    const btnNew = this.createQuickBtn(i18n.t('quick.new'), 'Yeni bir dişli tasarımı başlat (Ctrl+N)', () =>
       this.handleNewGear()
     );
 
-    const btnProjects = this.createQuickBtn('📂 Projelerim', 'Kayıtlı projeler yöneticisini aç', () =>
+    const btnProjects = this.createQuickBtn(i18n.t('quick.projects'), 'Kayıtlı projeler yöneticisini aç (Ctrl+O)', () =>
       this.projectManagerModal.open()
     );
 
-    const btnSave = this.createQuickBtn('💾 Kaydet', 'Projeyi LocalStorage\'a kaydet (Ctrl+S)', () =>
+    const btnSave = this.createQuickBtn(i18n.t('quick.save'), 'Projeyi LocalStorage\'a kaydet (Ctrl+S)', () =>
       this.handleQuickSave(),
       'btn-quick-save'
     );
 
-    const btnStl = this.createQuickBtn('⬇ STL İndir', '3D Yazıcı için Binary STL İndir (Ctrl+E)', () => {
+    const btnStl = this.createQuickBtn(i18n.t('quick.export_stl'), '3D Yazıcı için Binary STL İndir (Ctrl+E)', () => {
       this.store.exportPrimaryGear(ExportFormat.STL_BINARY);
       ToastNotification.success('Binary STL indiriliyor.', '3D Baskı');
     }, 'btn-quick-export');
 
     quickActions.append(btnNew, btnProjects, btnSave, btnStl);
-    menuRight.append(projectInfo, quickActions);
+
+    // Dil Seçici Açılır Menüsü (TR, EN, DE, RU)
+    const langDropdown = this.createLanguageDropdown();
+
+    menuRight.append(projectInfo, quickActions, langDropdown);
 
     this.container.append(menuLeft, menuRight);
   }
@@ -602,8 +626,7 @@ export class AppMenuBar {
         return;
       }
     }
-    this.store.newProject();
-    ToastNotification.info('Varsayılan parametrelerle yeni dişli oluşturuldu.', 'Yeni Tasarım');
+    this.wizardModal.open(true);
   }
 
   private handleResetDefault(): void {
@@ -717,6 +740,11 @@ export class AppMenuBar {
           e.preventDefault();
           this.handleNewGear();
         }
+      } else if (e.key === 'w' || e.key === 'W') {
+        if (!isInput) {
+          e.preventDefault();
+          this.wizardModal.open(true);
+        }
       } else if (e.key === 'e' || e.key === 'E') {
         if (!isInput) {
           e.preventDefault();
@@ -725,6 +753,57 @@ export class AppMenuBar {
         }
       }
     });
+  }
+
+  private createLanguageDropdown(): HTMLElement {
+    const wrap = document.createElement('div');
+    wrap.className = 'menubar-item menubar-lang-item';
+
+    const currentLang = i18n.getLanguage();
+    const currentOpt = SUPPORTED_LANGUAGES.find((l) => l.code === currentLang) || SUPPORTED_LANGUAGES[0];
+
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'menubar-btn menubar-lang-btn';
+    trigger.innerHTML = `<span class="flag">${currentOpt.flag}</span> <span class="lang-text">${currentOpt.code.toUpperCase()}</span> <span class="arrow-down">▾</span>`;
+    trigger.title = 'Arayüz Dili / Interface Language / Sprache / Язык';
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'menubar-dropdown menubar-dropdown-lang';
+
+    for (const opt of SUPPORTED_LANGUAGES) {
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = `dropdown-row ${opt.code === currentLang ? 'row-highlight' : ''}`;
+      row.innerHTML = `
+        <span class="row-left">
+          <span class="row-icon">${opt.flag}</span>
+          <span class="row-label">${opt.name}</span>
+        </span>
+        <span class="row-shortcut">${opt.code.toUpperCase()}</span>
+      `;
+      row.addEventListener('click', () => {
+        this.closeAllDropdowns();
+        i18n.setLanguage(opt.code);
+        ToastNotification.info(i18n.t('toast.lang_changed'));
+      });
+      dropdown.appendChild(row);
+    }
+
+    wrap.append(trigger, dropdown);
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleDropdown(wrap);
+    });
+
+    wrap.addEventListener('mouseenter', () => {
+      if (this.activeDropdown && this.activeDropdown !== wrap) {
+        this.openDropdown(wrap);
+      }
+    });
+
+    return wrap;
   }
 
   private escapeHtml(text: string): string {

@@ -14,6 +14,7 @@ import { GearViewportController } from './infrastructure/three/GearViewportContr
 import { AppMenuBar } from './presentation/components/AppMenuBar';
 import { EngineeringMetricsView } from './presentation/components/EngineeringMetricsView';
 import { MobileDrawerSheet } from './presentation/components/MobileDrawerSheet';
+import { GearCreationWizardModal } from './presentation/components/GearCreationWizardModal';
 import { ParameterControlsView } from './presentation/components/ParameterControlsView';
 import { ProjectManagerModal } from './presentation/components/ProjectManagerModal';
 import { SaveProjectModal } from './presentation/components/SaveProjectModal';
@@ -82,9 +83,10 @@ function bootstrapGearBuilderApp(): void {
     );
   });
 
-  // 4. Modalleri oluştur (Save ve Projeler Yöneticisi)
+  // 4. Modalleri oluştur (Save, Projeler Yöneticisi ve Dişli Tasarım Sihirbazı)
   const saveModal = new SaveProjectModal(store);
   const projectManagerModal = new ProjectManagerModal(store, saveModal);
+  const wizardModal = new GearCreationWizardModal(store);
 
   // 5. Üst Menü Çubuğunu (AppMenuBar) bağla
   if (menubarEl) {
@@ -93,7 +95,8 @@ function bootstrapGearBuilderApp(): void {
       store,
       viewportController,
       projectManagerModal,
-      saveModal
+      saveModal,
+      wizardModal
     );
   }
 
@@ -198,6 +201,15 @@ function bootstrapGearBuilderApp(): void {
 
   // 16. 3B Sahne ve Arayüz hazır olduğunda Preloader'ı yumuşak geçişle kapat
   dismissAppPreloader();
+
+  // 17. Sıfırdan app'i yeni açmışken sihirbaz dialogunu otomatik aç
+  const activeProjectId = storageRepository.getActiveProjectId();
+  const showWizardOnStartup = localStorage.getItem('gearforge_show_wizard_startup') !== 'false';
+  if (showWizardOnStartup && !activeProjectId) {
+    window.setTimeout(() => {
+      wizardModal.open(true);
+    }, 550);
+  }
 }
 
 /**
