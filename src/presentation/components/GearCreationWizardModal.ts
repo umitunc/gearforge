@@ -41,6 +41,7 @@ export class GearCreationWizardModal {
   private previewPanelEl: HTMLElement | null = null;
   private wizardThreePreview: WizardThreePreview | null = null;
   private previewMode: '3d' | '2d' | 'dual' = '3d';
+  private mobileViewMode: 'split' | 'form' | 'preview' = 'split';
   private currentStep = 1;
   private readonly totalSteps = 5;
   private params: GearParameters;
@@ -131,13 +132,26 @@ export class GearCreationWizardModal {
     // 2. Stepper Adım Göstergesi
     const stepper = this.buildStepper();
 
+    // 2.5. Mobil Görünüm Modu Seçici (Split / Form / 3B)
+    const mobileSwitcher = this.buildMobileViewSwitcher();
+
     // 3. Adım İçerik Konteyneri (İki Kolonlu Split Düzen: Sol Form, Sağ Büyük 2D CAD ve Formüller)
     const body = document.createElement('div');
-    body.className = 'wizard-body wizard-split-body';
+    body.className = `wizard-body wizard-split-body mobile-mode-${this.mobileViewMode}`;
 
     const leftCol = document.createElement('div');
     leftCol.className = 'wizard-form-col';
     leftCol.appendChild(this.buildStepContent(this.currentStep));
+
+    // Form odaklı mobil modda 3B önizlemeye hızlı dönüş butonu
+    const floating3dBtn = document.createElement('button');
+    floating3dBtn.type = 'button';
+    floating3dBtn.className = 'wizard-mobile-floating-3d-btn';
+    floating3dBtn.innerHTML = `<span>🧊</span> <span>${i18n.t('wizard.mobile_btn_to_3d') || '3B Önizleme'}</span>`;
+    floating3dBtn.addEventListener('click', () => {
+      this.setMobileViewMode('split');
+    });
+    leftCol.appendChild(floating3dBtn);
 
     const rightCol = this.buildPreviewPanel(this.currentStep);
     this.previewPanelEl = rightCol;
@@ -147,7 +161,7 @@ export class GearCreationWizardModal {
     // 4. Alt Eylem Çubuğu: Geri, İleri, Oluştur, İptal
     const footer = this.buildFooter();
 
-    card.append(header, stepper, body, footer);
+    card.append(header, stepper, mobileSwitcher, body, footer);
     overlay.appendChild(card);
     document.body.appendChild(overlay);
     this.modalEl = overlay;
@@ -221,11 +235,11 @@ export class GearCreationWizardModal {
     stepper.className = 'wizard-stepper';
 
     const stepTabs = [
-      { step: 1, label: i18n.t('wizard.step1.tab'), icon: '⚙️' },
-      { step: 2, label: i18n.t('wizard.step2.tab'), icon: '🔩' },
-      { step: 3, label: i18n.t('wizard.step3.tab'), icon: '🛞' },
-      { step: 4, label: i18n.t('wizard.step4.tab'), icon: '🖨️' },
-      { step: 5, label: i18n.t('wizard.step5.tab'), icon: '🚀' },
+      { step: 1, label: i18n.t('wizard.step1.tab'), shortLabel: i18n.t('wizard.step1.short') || '1. Tip', icon: '⚙️' },
+      { step: 2, label: i18n.t('wizard.step2.tab'), shortLabel: i18n.t('wizard.step2.short') || '2. Delik', icon: '🔩' },
+      { step: 3, label: i18n.t('wizard.step3.tab'), shortLabel: i18n.t('wizard.step3.short') || '3. Göbek', icon: '🛞' },
+      { step: 4, label: i18n.t('wizard.step4.tab'), shortLabel: i18n.t('wizard.step4.short') || '4. Profil', icon: '🖨️' },
+      { step: 5, label: i18n.t('wizard.step5.tab'), shortLabel: i18n.t('wizard.step5.short') || '5. STL', icon: '🚀' },
     ];
 
     for (const item of stepTabs) {
@@ -237,7 +251,8 @@ export class GearCreationWizardModal {
       tab.className = `wizard-step-tab ${isActive ? 'active' : ''} ${isPast ? 'completed' : ''}`;
       tab.innerHTML = `
         <span class="step-num">${isPast ? '✓' : item.icon}</span>
-        <span class="step-label">${item.label}</span>
+        <span class="step-label-desktop">${item.label}</span>
+        <span class="step-label-mobile">${item.shortLabel}</span>
       `;
       // Tamamlanmış veya tıklanabilir önceki adımlara serbest geçiş
       tab.addEventListener('click', () => {
@@ -250,6 +265,61 @@ export class GearCreationWizardModal {
     }
 
     return stepper;
+  }
+
+  /**
+   * Mobil Görünüm Modu Değiştirici (İkili Bölünmüş, Sadece Form, Tam 3B Önizleme)
+   */
+  private buildMobileViewSwitcher(): HTMLElement {
+    const wrap = document.createElement('div');
+    wrap.className = 'wizard-mobile-view-switcher';
+
+    const modes = [
+      { id: 'split' as const, label: i18n.t('wizard.mobile_view_split') || '🌓 İkili (3B + Form)' },
+      { id: 'form' as const, label: i18n.t('wizard.mobile_view_form') || '⚙️ Form' },
+      { id: 'preview' as const, label: i18n.t('wizard.mobile_view_preview') || '🧊 3B Önizleme' },
+    ];
+
+    for (const m of modes) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `wizard-m-switch-btn ${this.mobileViewMode === m.id ? 'active' : ''}`;
+      btn.textContent = m.label;
+      btn.addEventListener('click', () => {
+        this.setMobileViewMode(m.id);
+      });
+      wrap.appendChild(btn);
+    }
+
+    return wrap;
+  }
+
+  /**
+   * Mobil görünüm modunu günceller.
+   */
+  private setMobileViewMode(mode: 'split' | 'form' | 'preview'): void {
+    this.mobileViewMode = mode;
+    if (!this.modalEl) return;
+    const body = this.modalEl.querySelector('.wizard-split-body');
+    if (body) {
+      body.classList.remove('mobile-mode-split', 'mobile-mode-form', 'mobile-mode-preview');
+      body.classList.add(`mobile-mode-${mode}`);
+    }
+    const switcherBtns = this.modalEl.querySelectorAll('.wizard-m-switch-btn');
+    const modes: ('split' | 'form' | 'preview')[] = ['split', 'form', 'preview'];
+    switcherBtns.forEach((btn, idx) => {
+      btn.classList.toggle('active', modes[idx] === mode);
+    });
+
+    const fullBtn = this.modalEl.querySelector('.wizard-preview-fullscreen-btn');
+    if (fullBtn) {
+      fullBtn.innerHTML = mode === 'preview' ? '🗗' : '⛶';
+      fullBtn.setAttribute('title', mode === 'preview' ? 'Bölünmüş Görünüme Dön' : 'Tam Ekran 3B');
+    }
+
+    requestAnimationFrame(() => {
+      this.wizardThreePreview?.resize();
+    });
   }
 
   /**
@@ -331,15 +401,16 @@ export class GearCreationWizardModal {
     const modeRow = document.createElement('div');
     modeRow.className = 'wizard-mode-chips';
     const modes = [
-      { mode: SizingMode.MODULE, label: i18n.t('param.sizingMode.module') },
-      { mode: SizingMode.PITCH_DIAMETER, label: i18n.t('param.sizingMode.pitch') },
-      { mode: SizingMode.OUTER_DIAMETER, label: i18n.t('param.sizingMode.outer') },
+      { mode: SizingMode.MODULE, label: i18n.t('param.sizingMode.module'), shortLabel: 'm + z → d' },
+      { mode: SizingMode.PITCH_DIAMETER, label: i18n.t('param.sizingMode.pitch'), shortLabel: 'd + z → m' },
+      { mode: SizingMode.OUTER_DIAMETER, label: i18n.t('param.sizingMode.outer'), shortLabel: 'da + z → m' },
     ];
     for (const m of modes) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = `wizard-mode-chip ${this.params.sizingMode === m.mode ? 'active' : ''}`;
-      btn.textContent = m.label;
+      btn.innerHTML = `<span class="mode-label-desktop">${m.label}</span><span class="mode-label-mobile">${m.shortLabel}</span>`;
+      btn.title = m.label;
       btn.addEventListener('click', () => {
         this.updateParam('sizingMode', m.mode);
         this.render();
@@ -1072,7 +1143,18 @@ export class GearCreationWizardModal {
       modeSwitch.appendChild(btn);
     }
 
-    header.append(left, modeSwitch);
+    // Tam Ekran / Bölünmüş Geçiş Butonu (Özellikle Mobil için)
+    const fullBtn = document.createElement('button');
+    fullBtn.type = 'button';
+    fullBtn.className = 'wizard-preview-fullscreen-btn';
+    fullBtn.title = this.mobileViewMode === 'preview' ? 'Bölünmüş Görünüme Dön' : 'Tam Ekran 3B';
+    fullBtn.innerHTML = this.mobileViewMode === 'preview' ? '🗗' : '⛶';
+    fullBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.setMobileViewMode(this.mobileViewMode === 'preview' ? 'split' : 'preview');
+    });
+
+    header.append(left, modeSwitch, fullBtn);
 
     // 2. Bu Adımdaki Parametrelerin / Çizimlerin Hızlı Seçim Şeridi
     const pills = this.buildStepThumbnailsStrip(step);
@@ -1119,7 +1201,16 @@ export class GearCreationWizardModal {
       <p class="preview-info-text">${data.explanation}</p>
     `;
 
-    panel.append(header, pills, viewportArea, formulaHero, explanationCard);
+    // Mobil tam ekran önizleme modunda parametre formuna dönüş butonu
+    const backToFormBtn = document.createElement('button');
+    backToFormBtn.type = 'button';
+    backToFormBtn.className = 'wizard-mobile-back-to-form-btn';
+    backToFormBtn.innerHTML = `<span>⚙️</span> <span>${i18n.t('wizard.mobile_btn_to_form') || 'Parametreleri Düzenle'}</span>`;
+    backToFormBtn.addEventListener('click', () => {
+      this.setMobileViewMode('split');
+    });
+
+    panel.append(header, pills, viewportArea, formulaHero, explanationCard, backToFormBtn);
     return panel;
   }
 
@@ -1783,7 +1874,13 @@ export class GearCreationWizardModal {
     slider.step = String(step);
     slider.value = String(value);
 
-    const emitVal = (valStr: string) => {
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const commitVal = (valStr: string) => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+        debounceTimer = null;
+      }
       const parsed = parseFloat(valStr);
       if (!Number.isNaN(parsed)) {
         miniThumb.innerHTML = GearDimensionThumbnail2D.renderSvg(key, parsed, {
@@ -1799,14 +1896,61 @@ export class GearCreationWizardModal {
       }
     };
 
+    const scheduleCommit = (valStr: string) => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        commitVal(valStr);
+      }, 160);
+    };
+
+    // Sürükleme anında (on input): Yalnızca sayısal girişi anında güncelle, 3B hesaplamayı beklet (seri 60/120 FPS akıcılık)
     slider.addEventListener('input', () => {
       numInput.value = slider.value;
-      emitVal(slider.value);
+      const parsed = parseFloat(slider.value);
+      if (!Number.isNaN(parsed)) {
+        (this.params as Record<string, any>)[key] = parsed;
+      }
+      scheduleCommit(slider.value);
+    });
+
+    // İşlem bittiğinde (on change / pointerup / touchend / mouseup): 3B önizlemeye ve sahneye uygula
+    slider.addEventListener('change', () => {
+      commitVal(slider.value);
+    });
+
+    slider.addEventListener('pointerup', () => {
+      commitVal(slider.value);
+    });
+
+    slider.addEventListener('touchend', () => {
+      commitVal(slider.value);
+    });
+
+    slider.addEventListener('mouseup', () => {
+      commitVal(slider.value);
     });
 
     numInput.addEventListener('input', () => {
       slider.value = numInput.value;
-      emitVal(numInput.value);
+      const parsed = parseFloat(numInput.value);
+      if (!Number.isNaN(parsed)) {
+        (this.params as Record<string, any>)[key] = parsed;
+      }
+      scheduleCommit(numInput.value);
+    });
+
+    numInput.addEventListener('change', () => {
+      commitVal(numInput.value);
+    });
+
+    numInput.addEventListener('blur', () => {
+      commitVal(numInput.value);
+    });
+
+    numInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        numInput.blur();
+      }
     });
 
     card.addEventListener('click', () => {

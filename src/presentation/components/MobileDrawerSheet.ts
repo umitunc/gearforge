@@ -17,6 +17,7 @@ export class MobileDrawerSheet {
   private readonly onOpenSaveModal?: () => void;
   private readonly onOpenProjectsModal?: () => void;
   private readonly onHeightModeChange?: (mode: DrawerHeightMode) => void;
+  private readonly onOpenWizard?: () => void;
 
   private backdropEl!: HTMLElement;
   private sheetEl!: HTMLElement;
@@ -40,7 +41,8 @@ export class MobileDrawerSheet {
     parameterControlsView: ParameterControlsView,
     onOpenSaveModal?: () => void,
     onOpenProjectsModal?: () => void,
-    onHeightModeChange?: (mode: DrawerHeightMode) => void
+    onHeightModeChange?: (mode: DrawerHeightMode) => void,
+    onOpenWizard?: () => void
   ) {
     this.container = container;
     this.store = store;
@@ -48,6 +50,7 @@ export class MobileDrawerSheet {
     this.onOpenSaveModal = onOpenSaveModal;
     this.onOpenProjectsModal = onOpenProjectsModal;
     this.onHeightModeChange = onHeightModeChange;
+    this.onOpenWizard = onOpenWizard;
 
     this.render();
     this.setupTouchGestures();
@@ -89,6 +92,16 @@ export class MobileDrawerSheet {
     const headerActions = document.createElement('div');
     headerActions.className = 'drawer-header-actions';
 
+    const wizardBtn = document.createElement('button');
+    wizardBtn.type = 'button';
+    wizardBtn.className = 'drawer-action-btn btn-wizard';
+    wizardBtn.innerHTML = '🧙‍♂️';
+    wizardBtn.title = 'Dişli Tasarım Sihirbazı';
+    wizardBtn.addEventListener('click', () => {
+      this.setHeightMode('hidden');
+      this.onOpenWizard?.();
+    });
+
     const saveBtn = document.createElement('button');
     saveBtn.type = 'button';
     saveBtn.className = 'drawer-action-btn btn-save';
@@ -119,7 +132,7 @@ export class MobileDrawerSheet {
     closeBtn.title = 'Kapat / 3B Sahneye Dön';
     closeBtn.addEventListener('click', () => this.setHeightMode('hidden'));
 
-    headerActions.append(saveBtn, projectsBtn, this.expandBtn, closeBtn);
+    headerActions.append(wizardBtn, saveBtn, projectsBtn, this.expandBtn, closeBtn);
     header.append(headerLeft, headerActions);
 
     // Çekmece İçerik Gövdesi
@@ -132,6 +145,10 @@ export class MobileDrawerSheet {
     this.bottomBarEl = document.createElement('nav');
     this.bottomBarEl.className = 'mobile-bottom-bar';
     this.bottomBarEl.innerHTML = `
+      <button type="button" class="m-bar-btn btn-open-wizard highlight-wizard" title="Dişli Tasarım Sihirbazı">
+        <span class="m-bar-icon">🧙‍♂️</span>
+        <span class="m-bar-label">Sihirbaz</span>
+      </button>
       <button type="button" class="m-bar-btn btn-open-params active">
         <span class="m-bar-icon">🎛️</span>
         <span class="m-bar-label">Parametreler</span>
@@ -156,10 +173,16 @@ export class MobileDrawerSheet {
   }
 
   private setupBottomBarEvents(): void {
+    const wizardBtn = this.bottomBarEl.querySelector('.btn-open-wizard');
     const paramsBtn = this.bottomBarEl.querySelector('.btn-open-params');
     const metricsBtn = this.bottomBarEl.querySelector('.btn-open-metrics');
     const stlBtn = this.bottomBarEl.querySelector('.btn-quick-stl');
     const view3dBtn = this.bottomBarEl.querySelector('.btn-view-3d');
+
+    wizardBtn?.addEventListener('click', () => {
+      this.setHeightMode('hidden');
+      this.onOpenWizard?.();
+    });
 
     paramsBtn?.addEventListener('click', () => {
       if (this.currentHeightMode === 'hidden') {

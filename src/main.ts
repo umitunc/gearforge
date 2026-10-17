@@ -161,7 +161,8 @@ function bootstrapGearBuilderApp(): void {
           if (window.innerWidth <= 960) {
             dimensionOverlay?.toggleVisibility(mode === 'hidden');
           }
-        }
+        },
+        () => wizardModal.open(true)
       )
     : null;
 

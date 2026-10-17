@@ -79,26 +79,35 @@ const TRANSLATIONS: Record<SupportedLanguage, TranslationDictionary> = {
     'wizard.toolbar_rotate': 'Otomatik Dönüş',
     'wizard.toolbar_wireframe': 'Tel Kafes',
     'wizard.toolbar_center': 'Kamerayı Sıfırla',
-
+    'wizard.mobile_view_split': '🌓 İkili (3B + Form)',
+    'wizard.mobile_view_form': '⚙️ Form',
+    'wizard.mobile_view_preview': '🧊 3B Önizleme',
+    'wizard.mobile_btn_to_form': '⚙️ Parametreleri Düzenle',
+    'wizard.mobile_btn_to_3d': '🧊 3B Önizleme',
 
     // Sihirbaz Adımları
     'wizard.step1.tab': '1. Boyut & Tip',
+    'wizard.step1.short': '1. Tip',
     'wizard.step1.title': '1. Dişli Tipi ve Ana Boyutlar',
     'wizard.step1.desc': 'Dişli mekanizma mimarisini, diş sayısını, modülünü ve et kalınlığını belirleyin.',
 
     'wizard.step2.tab': '2. Delik & Mil',
+    'wizard.step2.short': '2. Delik',
     'wizard.step2.title': '2. Merkez Delik & Mil Bağlantısı',
     'wizard.step2.desc': 'Motor veya rulman şaftı tipini (Yuvarlak, DIN 6885 Kama veya Step Motor D-Şaft) yapılandırın.',
 
     'wizard.step3.tab': '3. Göbek & Web',
+    'wizard.step3.short': '3. Göbek',
     'wizard.step3.title': '3. Göbek (Hub) ve Ağırlık Hafifletme',
     'wizard.step3.desc': 'Filament tasarrufu ve rijitlik için gövde çökertmesi, jant kolları veya hafifletme delikleri ekleyin.',
 
     'wizard.step4.tab': '4. Evolvent & FDM',
+    'wizard.step4.short': '4. Profil',
     'wizard.step4.title': '4. Evolvent Profil & 3D Yazıcı Toleransları',
     'wizard.step4.desc': 'Kavrama açısı, profil kaydırma, filament büzülmesi ve FDM backlash ayarlarını kalibre edin.',
 
     'wizard.step5.tab': '5. Özet & Oluştur',
+    'wizard.step5.short': '5. STL',
     'wizard.step5.title': '5. Teknik Doğrulama ve Proje Kaydı',
     'wizard.step5.desc': 'Hesaplanan ISO 21771 diş geometrisini inceleyin ve projenizi 3B çalışma alanına aktarın.',
 
@@ -299,26 +308,35 @@ const TRANSLATIONS: Record<SupportedLanguage, TranslationDictionary> = {
     'wizard.toolbar_rotate': 'Auto Rotate',
     'wizard.toolbar_wireframe': 'Wireframe',
     'wizard.toolbar_center': 'Reset Camera',
-
+    'wizard.mobile_view_split': '🌓 Split (3D + Form)',
+    'wizard.mobile_view_form': '⚙️ Form',
+    'wizard.mobile_view_preview': '🧊 3D Preview',
+    'wizard.mobile_btn_to_form': '⚙️ Edit Parameters',
+    'wizard.mobile_btn_to_3d': '🧊 3D Preview',
 
     // Wizard Steps
     'wizard.step1.tab': '1. Sizing & Type',
+    'wizard.step1.short': '1. Type',
     'wizard.step1.title': '1. Gear Type and Key Dimensions',
     'wizard.step1.desc': 'Select mechanical gear architecture, teeth count, module, and face width.',
 
     'wizard.step2.tab': '2. Bore & Shaft',
+    'wizard.step2.short': '2. Bore',
     'wizard.step2.title': '2. Center Bore & Shaft Coupling',
     'wizard.step2.desc': 'Configure shaft interface (Circular, DIN 6885 Keyway, or Stepper D-Shaft).',
 
     'wizard.step3.tab': '3. Hub & Web',
+    'wizard.step3.short': '3. Hub',
     'wizard.step3.title': '3. Hub & Weight Lightening',
     'wizard.step3.desc': 'Add recessed web, spokes, or lightening holes for filament savings and rigidity.',
 
     'wizard.step4.tab': '4. Involute & FDM',
+    'wizard.step4.short': '4. Profile',
     'wizard.step4.title': '4. Involute Profile & 3D Print Tolerances',
     'wizard.step4.desc': 'Calibrate pressure angle, profile shift, filament shrinkage, and FDM backlash.',
 
     'wizard.step5.tab': '5. Review & Create',
+    'wizard.step5.short': '5. STL',
     'wizard.step5.title': '5. Technical Verification & Finalize',
     'wizard.step5.desc': 'Inspect calculated ISO 21771 gear metrics and deploy project to 3D workspace.',
 
@@ -519,26 +537,35 @@ const TRANSLATIONS: Record<SupportedLanguage, TranslationDictionary> = {
     'wizard.toolbar_rotate': 'Auto-Drehung',
     'wizard.toolbar_wireframe': 'Drahtgitter',
     'wizard.toolbar_center': 'Kamera zurücksetzen',
-
+    'wizard.mobile_view_split': '🌓 Geteilt (3D + Form)',
+    'wizard.mobile_view_form': '⚙️ Formular',
+    'wizard.mobile_view_preview': '🧊 3D-Vorschau',
+    'wizard.mobile_btn_to_form': '⚙️ Parameter bearbeiten',
+    'wizard.mobile_btn_to_3d': '🧊 3D-Vorschau',
 
     // Wizard Steps
     'wizard.step1.tab': '1. Typ & Maße',
+    'wizard.step1.short': '1. Typ',
     'wizard.step1.title': '1. Zahnradtyp und Hauptabmessungen',
     'wizard.step1.desc': 'Wählen Sie die Zahnradarchitektur, Zähnezahl, Modul und Zahnbreite.',
 
     'wizard.step2.tab': '2. Bohrung & Welle',
+    'wizard.step2.short': '2. Bohrung',
     'wizard.step2.title': '2. Wellenbohrung & Passfeder',
     'wizard.step2.desc': 'Konfigurieren Sie die Wellenaufnahme (Rund, DIN 6885 Passfeder oder D-Welle).',
 
     'wizard.step3.tab': '3. Nabe & Steg',
+    'wizard.step3.short': '3. Nabe',
     'wizard.step3.title': '3. Nabe & Gewichtsoptimierung',
     'wizard.step3.desc': 'Fügen Sie Aussparungen, Speichen oder Erleichterungsbohrungen für Filamentersparnis hinzu.',
 
     'wizard.step4.tab': '4. Evolvente & FDM',
+    'wizard.step4.short': '4. Profil',
     'wizard.step4.title': '4. Evolventenprofil & 3D-Druck-Toleranzen',
     'wizard.step4.desc': 'Kalibrieren Sie Eingriffswinkel, Profilverschiebung und FDM-Zahnflankenspiel (Backlash).',
 
     'wizard.step5.tab': '5. Zusammenfassung',
+    'wizard.step5.short': '5. STL',
     'wizard.step5.title': '5. Technische Überprüfung & Erstellung',
     'wizard.step5.desc': 'Prüfen Sie die berechneten ISO 21771 Kennwerte und übernehmen Sie das Zahnrad in die 3D-Bühne.',
 
@@ -739,26 +766,35 @@ const TRANSLATIONS: Record<SupportedLanguage, TranslationDictionary> = {
     'wizard.toolbar_rotate': 'Автоповорот',
     'wizard.toolbar_wireframe': 'Сетка',
     'wizard.toolbar_center': 'Сброс камеры',
-
+    'wizard.mobile_view_split': '🌓 Раздельно (3D + Форма)',
+    'wizard.mobile_view_form': '⚙️ Форма',
+    'wizard.mobile_view_preview': '🧊 3D Превью',
+    'wizard.mobile_btn_to_form': '⚙️ Редактировать параметры',
+    'wizard.mobile_btn_to_3d': '🧊 3D Превью',
 
     // Wizard Steps
     'wizard.step1.tab': '1. Размеры и тип',
+    'wizard.step1.short': '1. Тип',
     'wizard.step1.title': '1. Тип шестерни и основные размеры',
     'wizard.step1.desc': 'Выберите кинематическую архитектуру, число зубьев, модуль и ширину венца.',
 
     'wizard.step2.tab': '2. Отверстие и вал',
+    'wizard.step2.short': '2. Отверстие',
     'wizard.step2.title': '2. Центральное отверстие и крепление к валу',
     'wizard.step2.desc': 'Настройте посадочное место (Круглое, шпоночный паз DIN 6885 или D-вал).',
 
     'wizard.step3.tab': '3. Ступица и тело',
+    'wizard.step3.short': '3. Ступица',
     'wizard.step3.title': '3. Ступица и облегчение конструкции',
     'wizard.step3.desc': 'Добавьте выточки, спицы или облегчающие отверстия для экономии пластика и прочности.',
 
     'wizard.step4.tab': '4. Эвольвента и FDM',
+    'wizard.step4.short': '4. Профиль',
     'wizard.step4.title': '4. Эвольвентный профиль и допуски 3D-печати',
     'wizard.step4.desc': 'Откалибруйте угол зацепления, смещение профиля, усадку и боковой зазор (люфт).',
 
     'wizard.step5.tab': '5. Итог и создание',
+    'wizard.step5.short': '5. STL',
     'wizard.step5.title': '5. Техническая проверка и подтверждение',
     'wizard.step5.desc': 'Проверьте расчетные параметры геометрии ISO 21771 и загрузите модель в рабочее 3D-пространство.',
 
